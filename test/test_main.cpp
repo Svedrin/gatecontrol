@@ -22,19 +22,31 @@ void test_init_open() {
 void test_init_closed() {
     StateMachine statemachine;
 
-    esp_state_t input1 = {
+    esp_state_t input = {
         .pin_up         = HIGH,
         .pin_down       = LOW,
         .pin_lb_blocked = HIGH,
-        .pin_lb_clear   = HIGH,
+        .pin_lb_clear   = LOW,
         .millis = 0
     };
-    step_t step1 = statemachine.step(&input1);
-    TEST_ASSERT_EQUAL(GATE_CLOSED, step1.current_state);
+    step_t step = statemachine.step(&input);
+    TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
 
-    input1.pin_down = HIGH;
-    step_t step2 = statemachine.step(&input1);
-    TEST_ASSERT_EQUAL(GATE_UNKNOWN, step2.current_state);
+    input.pin_down = HIGH;
+    step = statemachine.step(&input);
+    TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
+
+    input.pin_up = LOW;
+    step = statemachine.step(&input);
+    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
+
+    input.pin_up = HIGH;
+    step = statemachine.step(&input);
+    TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
+
+    input.pin_down = LOW;
+    step = statemachine.step(&input);
+    TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
 }
 
 int main( int argc, char **argv) {
