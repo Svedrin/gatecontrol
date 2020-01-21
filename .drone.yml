@@ -1,0 +1,17 @@
+---
+kind: pipeline
+name: default
+
+steps:
+- name: run tests
+  image: python:alpine
+  commands:
+  - apk add --no-cache g++
+  - pip3 install platformio
+  - platformio update
+  - pio test -e native
+---
+kind: signature
+hmac: 80ca4b9087c5fc182245b53a38a8abb3349eed8065388e63efa55ef65b68f2ee
+
+...
