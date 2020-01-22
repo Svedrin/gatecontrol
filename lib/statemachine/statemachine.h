@@ -11,11 +11,16 @@ typedef enum {
     COMMAND_IGNORED
 } cmd_result_t;
 
+typedef enum {
+    SENSOR_CLEAR,
+    SENSOR_ACTIVE
+} sensor_state_t;
+
 typedef struct esp_state_t {
-    int pin_up;
-    int pin_down;
-    int pin_lb_blocked;
-    int pin_lb_clear;
+    int sensor_gate_up;
+    int sensor_gate_down;
+    int sensor_lb_blocked;
+    int sensor_lb_clear;
     unsigned long millis;
 } esp_state_t;
 

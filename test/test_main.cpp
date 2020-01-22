@@ -9,10 +9,10 @@ void test_init_open() {
     StateMachine statemachine;
 
     esp_state_t input1 = {
-        .pin_up         = LOW,
-        .pin_down       = HIGH,
-        .pin_lb_blocked = HIGH,
-        .pin_lb_clear   = HIGH,
+        .sensor_gate_up    = LOW,
+        .sensor_gate_down  = HIGH,
+        .sensor_lb_blocked = HIGH,
+        .sensor_lb_clear   = HIGH,
         .millis = 0
     };
     step_t step1 = statemachine.step(&input1);
@@ -23,28 +23,28 @@ void test_init_closed() {
     StateMachine statemachine;
 
     esp_state_t input = {
-        .pin_up         = HIGH,
-        .pin_down       = LOW,
-        .pin_lb_blocked = HIGH,
-        .pin_lb_clear   = LOW,
+        .sensor_gate_up    = HIGH,
+        .sensor_gate_down  = LOW,
+        .sensor_lb_blocked = HIGH,
+        .sensor_lb_clear   = LOW,
         .millis = 0
     };
     step_t step = statemachine.step(&input);
     TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
 
-    input.pin_down = HIGH;
+    input.sensor_gate_down = HIGH;
     step = statemachine.step(&input);
     TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
 
-    input.pin_up = LOW;
+    input.sensor_gate_up = LOW;
     step = statemachine.step(&input);
     TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
 
-    input.pin_up = HIGH;
+    input.sensor_gate_up = HIGH;
     step = statemachine.step(&input);
     TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
 
-    input.pin_down = LOW;
+    input.sensor_gate_down = LOW;
     step = statemachine.step(&input);
     TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
 }
@@ -53,10 +53,10 @@ void test_remote_close_uninterrupted() {
     StateMachine statemachine;
 
     esp_state_t input = {
-        .pin_up         = LOW,
-        .pin_down       = HIGH,
-        .pin_lb_blocked = HIGH,
-        .pin_lb_clear   = LOW,
+        .sensor_gate_up    = LOW,
+        .sensor_gate_down  = HIGH,
+        .sensor_lb_blocked = HIGH,
+        .sensor_lb_clear   = LOW,
         .millis = 100
     };
     step_t step = statemachine.step(&input);
