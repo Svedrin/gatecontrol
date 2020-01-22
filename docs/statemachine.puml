@@ -1,0 +1,17 @@
+@startuml
+
+[*] --> GATE_INIT
+
+GATE_INIT    -down-> GATE_CLOSED : Sensor Down Active
+GATE_INIT    -down-> GATE_OPEN   : Sensor Up Active
+
+GATE_BLOCKED -right-> GATE_OPEN    : Light Barrier Clear
+GATE_OPEN    -left->  GATE_BLOCKED : Light Barrier Active
+
+GATE_UNKNOWN -right-> GATE_CLOSED  : Sensor Down Active
+GATE_CLOSED  -left->  GATE_UNKNOWN : Sensor Down Clear
+
+GATE_OPEN    -right-> GATE_UNKNOWN : Sensor Up Clear
+GATE_UNKNOWN -left->  GATE_OPEN    : Sensor Up Active
+
+@enduml

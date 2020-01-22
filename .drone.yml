@@ -15,13 +15,14 @@ steps:
   image: debian:buster-slim
   commands:
   - apt-get update
-  - apt-get install -y --no-install-recommends g++ python3-pip python3-setuptools python3-wheel
+  - apt-get install -y --no-install-recommends make g++ python3-pip python3-setuptools python3-wheel plantuml
   - pip3 install platformio
   - platformio update
   - platformio platform install espressif8266
   - platformio lib install PubSubClient
   - "[ ! -e include/WifiParams.h ] && cp ci/WifiParams.h include/"
   - pio run -e d1_mini
+  - cd docs && LANG=C make | grep -q "up to date"
 
 - name: wait
   image: python:alpine
@@ -30,6 +31,6 @@ steps:
     - build
 ---
 kind: signature
-hmac: fa18212a002bba1860eccdc1604cda4b49473406c051535c32080e2356cdc2dd
+hmac: a1405189c8e1131f25fb2599e18c24b2710caa5b55b90efe2e1e0d2ea574f7ee
 
 ...
