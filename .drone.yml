@@ -15,7 +15,7 @@ steps:
   image: debian:buster-slim
   commands:
   - apt-get update
-  - apt-get install -f --no-install-recommends g++ python3-pip
+  - apt-get -f --no-install-recommends install g++ python3-pip
   - pip3 install platformio
   - platformio update
   - platformio platform install espressif8266
@@ -29,6 +29,6 @@ steps:
     - build
 ---
 kind: signature
-hmac: 117f0f214074591524f583297f3a8d7839f9697e81f275ca926f86b95ffbdc3d
+hmac: ea0ec7bb127725dba984e5f6652dbe6df6f943cc15f018ed587135e80dc96f9c
 
 ...
