@@ -1,4 +1,3 @@
-//#ifdef UNIT_TEST
 #include <unity.h>
 #include "statemachine.h"
 
@@ -114,4 +113,3 @@ int main( int argc, char **argv) {
     UNITY_END();
 }
 
-//#endif
