@@ -16,6 +16,7 @@ typedef struct {
     StateMachine statemachine;
     esp_state_t  input;
     step_t       result;
+    cmd_result_t cmd_result;
 } test_context_t;
 
 test_context_t *test_context = NULL;
@@ -43,14 +44,46 @@ void given_gate_is_down() {
     test_context->input.sensor_gate_down = SENSOR_ACTIVE;
 }
 
+void given_light_barrier_is_clear() {
+    test_context->input.sensor_lb_clear   = SENSOR_ACTIVE;
+    test_context->input.sensor_lb_blocked = SENSOR_CLEAR;
+}
+
+void given_light_barrier_is_blocked() {
+    test_context->input.sensor_lb_clear   = SENSOR_CLEAR;
+    test_context->input.sensor_lb_blocked = SENSOR_ACTIVE;
+}
+
+void given_light_barrier_is_broken() {
+    test_context->input.sensor_lb_clear   = SENSOR_CLEAR;
+    test_context->input.sensor_lb_blocked = SENSOR_CLEAR;
+}
+
 void when_time_passes(unsigned long millis) {
     test_context->input.millis = millis;
     test_context->result = test_context->statemachine.step(&test_context->input);
 }
 
+void when_mqtt_close_command_arrives_at(unsigned long millis) {
+    test_context->cmd_result = test_context->statemachine.cmd_close(millis);
+}
+
+void when_mqtt_commit_command_arrives_at(unsigned long millis) {
+    test_context->cmd_result = test_context->statemachine.cmd_commit(millis);
+}
+
 // This must be a macro so that line numbers are correct
 #define then_current_state_is(state) \
     TEST_ASSERT_EQUAL(state, test_context->result.current_state)
+
+#define then_the_command_is(accepted_or_rejected) \
+    TEST_ASSERT_EQUAL(accepted_or_rejected, test_context->cmd_result);
+
+#define then_we_do_not_trigger() \
+    TEST_ASSERT_FALSE(test_context->result.trigger)
+
+#define then_we_trigger() \
+    TEST_ASSERT_TRUE(test_context->result.trigger)
 
 /**
  * Da basics
@@ -84,62 +117,44 @@ void test_init_closed() {
     then_current_state_is(GATE_CLOSED);
 }
 
-void test_remote_close_uninterrupted() {
-    StateMachine statemachine;
+void test_remote_close_normal() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
 
-    esp_state_t input = {
-        .sensor_gate_up    = SENSOR_ACTIVE,
-        .sensor_gate_down  = SENSOR_CLEAR,
-        .sensor_lb_blocked = SENSOR_CLEAR,
-        .sensor_lb_clear   = SENSOR_ACTIVE,
-        .millis = 100
-    };
-    step_t step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
+    when_mqtt_close_command_arrives_at(500);
+    then_the_command_is(COMMAND_ACCEPTED);
 
-    cmd_result_t res = statemachine.cmd_close(500);
-    TEST_ASSERT_EQUAL(COMMAND_ACCEPTED, res);
+    when_time_passes(800);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
 
-    input.millis = 800;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
-    TEST_ASSERT_FALSE(step.trigger);
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_ACCEPTED);
 
-    res = statemachine.cmd_commit(10536);
-    TEST_ASSERT_EQUAL(COMMAND_ACCEPTED, res);
-
-    input.millis = 1600;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
-    TEST_ASSERT_TRUE(step.trigger);
+    when_time_passes(1600);
+    then_current_state_is(GATE_OPEN);
+    then_we_trigger();
 }
 
 void test_remote_close_light_barrier_blocked() {
-    StateMachine statemachine;
+    given_gate_is_up();
+    given_light_barrier_is_blocked();
+    when_time_passes(100);
+    then_current_state_is(GATE_OPEN);
 
-    esp_state_t input = {
-        .sensor_gate_up    = SENSOR_ACTIVE,
-        .sensor_gate_down  = SENSOR_CLEAR,
-        .sensor_lb_blocked = SENSOR_ACTIVE,
-        .sensor_lb_clear   = SENSOR_CLEAR,
-        .millis = 100
-    };
-    step_t step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
+    when_mqtt_close_command_arrives_at(500);
+    then_the_command_is(COMMAND_ACCEPTED);
 
-    cmd_result_t res = statemachine.cmd_close(500);
-    TEST_ASSERT_EQUAL(COMMAND_ACCEPTED, res);
+    when_time_passes(800);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
 
-    input.millis = 800;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
-    TEST_ASSERT_FALSE(step.trigger);
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_ACCEPTED);
 
-    res = statemachine.cmd_commit(10536);
-    TEST_ASSERT_EQUAL(COMMAND_ACCEPTED, res);
-
-    input.millis = 1600;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
-    TEST_ASSERT_FALSE(step.trigger);
+    when_time_passes(1600);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
 }
