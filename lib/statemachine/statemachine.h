@@ -1,3 +1,5 @@
+#include <sensorstate.h>
+
 typedef enum {
     GATE_INIT,     // State used for the first reading after boot
     GATE_OPEN,     // Gate is full open (top sensor is low)
@@ -10,12 +12,6 @@ typedef enum {
     COMMAND_IGNORED,
     COMMAND_ACCEPTED
 } cmd_result_t;
-
-typedef enum {
-    SENSOR_CLEAR,  // Sensor does not signal anything
-    SENSOR_ACTIVE, // Sensor has detected something
-    SENSOR_ERROR   // Sensor is gone (hardware issue, e.g. unplugged)
-} sensor_state_t;
 
 typedef struct esp_state_t {
     sensor_state_t sensor_gate_up;

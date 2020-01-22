@@ -1,5 +1,6 @@
 #include <unity.h>
 #include "statemachine.h"
+#include "monitoredsensor.h"
 
 void test_init_open() {
     StateMachine statemachine;
@@ -105,11 +106,54 @@ void test_remote_close_light_barrier_blocked() {
     TEST_ASSERT_FALSE(step.trigger);
 }
 
+void test_monitoredsensor() {
+    TestableMonitoredSensor sensor(1, 2, 0);
+
+    // Test valid states
+    sensor.set_pin_states(0, 0);
+    TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(40));
+
+    sensor.set_pin_states(1, 0);
+    TEST_ASSERT_EQUAL(SENSOR_CLEAR, sensor.read(60));
+
+    // Create an error -- should be debounced until millis=130
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_CLEAR, sensor.read(80));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_CLEAR, sensor.read(100));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_CLEAR, sensor.read(120));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_ERROR, sensor.read(140));
+
+    // Go back to active state, check the same thing with CLEAR
+    sensor.set_pin_states(0, 0);
+    TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(160));
+
+    // Error, should be debounced until millis=230
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(180));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(200));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(220));
+
+    sensor.set_pin_states(1, 1);
+    TEST_ASSERT_EQUAL(SENSOR_ERROR, sensor.read(240));
+
+}
+
 int main( int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_init_open);
     RUN_TEST(test_init_closed);
     RUN_TEST(test_remote_close_uninterrupted);
+    RUN_TEST(test_monitoredsensor);
     UNITY_END();
 }
 
