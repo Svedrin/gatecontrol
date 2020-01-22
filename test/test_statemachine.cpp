@@ -2,48 +2,86 @@
 #include "statemachine.h"
 #include "test_statemachine.h"
 
-void test_init_open() {
-    StateMachine statemachine;
+/**
+ * I'd love to use cucumber for these tests, but since I don't know
+ * how to integrate it properly with PlatformIO, I won't.
+ * I will however try to make these tests as cucumbery as possible.
+ * Let's hope that doesn't end in chaos, as such attempts often do.
+ *
+ * So first of all, I shall define some steps from which to build
+ * the actual tests.
+ */
 
-    esp_state_t input1 = {
-        .sensor_gate_up    = SENSOR_ACTIVE,
-        .sensor_gate_down  = SENSOR_CLEAR,
-        .sensor_lb_blocked = SENSOR_CLEAR,
-        .sensor_lb_clear   = SENSOR_CLEAR,
-        .millis = 0
-    };
-    step_t step1 = statemachine.step(&input1);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step1.current_state);
+typedef struct {
+    StateMachine statemachine;
+    esp_state_t  input;
+    step_t       result;
+} test_context_t;
+
+test_context_t *test_context = NULL;
+
+void setUp() {
+    test_context = new test_context_t;
+}
+
+/**
+ * Step definitions
+ */
+
+void given_gate_is_up() {
+    test_context->input.sensor_gate_up   = SENSOR_ACTIVE;
+    test_context->input.sensor_gate_down = SENSOR_CLEAR;
+}
+
+void given_gate_is_moving() {
+    test_context->input.sensor_gate_up   = SENSOR_CLEAR;
+    test_context->input.sensor_gate_down = SENSOR_CLEAR;
+}
+
+void given_gate_is_down() {
+    test_context->input.sensor_gate_up   = SENSOR_CLEAR;
+    test_context->input.sensor_gate_down = SENSOR_ACTIVE;
+}
+
+void when_time_passes(unsigned long millis) {
+    test_context->input.millis = millis;
+    test_context->result = test_context->statemachine.step(&test_context->input);
+}
+
+// This must be a macro so that line numbers are correct
+#define then_current_state_is(state) \
+    TEST_ASSERT_EQUAL(state, test_context->result.current_state)
+
+/**
+ * Da basics
+ */
+
+void test_init_open() {
+    given_gate_is_up();
+    when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
 }
 
 void test_init_closed() {
-    StateMachine statemachine;
+    given_gate_is_down();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
 
-    esp_state_t input = {
-        .sensor_gate_up    = SENSOR_CLEAR,
-        .sensor_gate_down  = SENSOR_ACTIVE,
-        .sensor_lb_blocked = SENSOR_CLEAR,
-        .sensor_lb_clear   = SENSOR_ACTIVE,
-        .millis = 0
-    };
-    step_t step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
+    given_gate_is_moving();
+    when_time_passes(20);
+    then_current_state_is(GATE_UNKNOWN);
 
-    input.sensor_gate_down = SENSOR_CLEAR;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
+    given_gate_is_up();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
 
-    input.sensor_gate_up = SENSOR_ACTIVE;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_OPEN, step.current_state);
+    given_gate_is_moving();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
 
-    input.sensor_gate_up = SENSOR_CLEAR;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_UNKNOWN, step.current_state);
-
-    input.sensor_gate_down = SENSOR_ACTIVE;
-    step = statemachine.step(&input);
-    TEST_ASSERT_EQUAL(GATE_CLOSED, step.current_state);
+    given_gate_is_down();
+    when_time_passes(50);
+    then_current_state_is(GATE_CLOSED);
 }
 
 void test_remote_close_uninterrupted() {
