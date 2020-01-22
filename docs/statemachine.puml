@@ -23,6 +23,7 @@ GATE_BLOCKED: hard_state = "blocked"
 GATE_BLOCKED    -down->  GATE_CLOSE_AUTO    : Light Barrier Clear\nautoclose is set
 GATE_CLOSE_AUTO -up->    GATE_BLOCKED       : Light Barrier Active
 GATE_CLOSE_AUTO -up->    GATE_OPEN          : timeout
+GATE_CLOSE_AUTO : hard_state = "open"
 GATE_CLOSE_AUTO : signal autoclose incoming
 GATE_CLOSE_AUTO : when timeout exceeded:
 GATE_CLOSE_AUTO : * signal "close me", but
@@ -50,6 +51,7 @@ GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
 GATE_CLOSE_TRIGGERED: * signal gate moving
 
 GATE_ERROR           -right->  [*]
+GATE_ERROR: hard_state = "error"
 GATE_ERROR: also used when one of
 GATE_ERROR: the other states detects
 GATE_ERROR: a broken sensor
