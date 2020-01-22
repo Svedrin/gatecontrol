@@ -3,15 +3,30 @@ kind: pipeline
 name: default
 
 steps:
-- name: run tests
+- name: test
   image: python:alpine
   commands:
   - apk add --no-cache g++
   - pip3 install platformio
   - platformio update
   - pio test -e native
+
+- name: build
+  image: python:alpine
+  commands:
+  - apk add --no-cache g++
+  - pip3 install platformio
+  - platformio update
+  - "[ ! -e include/WifiParams.h ] && cp ci/WifiParams.h include/"
+  - pio run -e d1_mini
+
+- name: wait
+  image: python:alpine
+  depends_on:
+    - test
+    - build
 ---
 kind: signature
-hmac: 80ca4b9087c5fc182245b53a38a8abb3349eed8065388e63efa55ef65b68f2ee
+hmac: 4fb38b6954040b70f475a5eb7c52224566762134de654c67d1418315642a8c98
 
 ...
