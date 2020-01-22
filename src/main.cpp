@@ -6,6 +6,9 @@
 #include <WifiParams.h>
 #include "main.h"
 
+#include <monitoredsensor.h>
+#include <statemachine.h>
+
 #define PIN_UP D1
 #define PIN_DN D2
 
@@ -15,27 +18,15 @@
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+StateMachine state_machine;
+MonitoredSensor light_barrier(PIN_LB_BLOCKED, PIN_LB_CLEAR, LOW);
 
-typedef enum {
-    GATE_INIT,     // State used for the first reading after boot
-    GATE_OPEN,     // Gate is full open (top sensor is low)
-    GATE_UNKNOWN,  // Gate is somewhere between full open and full closed
-    GATE_CLOSED    // Gate is full closed (bottom sensor is low)
-} state_t;
-
-state_t active_state = GATE_INIT;
-long received_close_at;
-long received_commit_at;
 unsigned long last_tick;
 unsigned long last_msg;
-char* hard_pos = NULL;
+char hard_pos[50];
 char prev_hard_pos[50];
 
 void on_mqtt_message(char* topic, byte* payload, unsigned int length);
-
-int derp() {
-    return 10;
-}
 
 void reconnect() {
     // Loop until we're reconnected
@@ -88,8 +79,6 @@ void setup(void)
     client.setServer(MQTT_HOST, MQTT_PORT);
     client.setCallback(on_mqtt_message);
 
-    received_close_at   = 0;
-    received_commit_at  = 0;
     last_tick = 0;
     last_msg  = 0;
 }
@@ -111,26 +100,17 @@ void on_mqtt_message(char* topic, byte* payload, unsigned int length) {
     if( strcmp(topic, "ctrl/tor/set_hard_position") == 0 ){
         if(strncmp((const char *)payload, "CLOSED", length) == 0){
             Serial.println("Received CLOSE message");
-            if(active_state == GATE_OPEN && received_close_at == 0){
-                received_close_at = millis();
+            if(state_machine.cmd_close(millis()) == COMMAND_ACCEPTED){
                 client.publish("ctrl/tor/close_ack", "waiting");
             }
         }
         else if(strncmp((const char *)payload, "COMMIT", length) == 0){
             Serial.println("Received COMMIT message");
-            if(active_state == GATE_OPEN && received_commit_at == 0){
-                received_commit_at = millis();
+            if(state_machine.cmd_commit(millis()) == COMMAND_ACCEPTED){
                 client.publish("ctrl/tor/close_ack", "commit");
             }
         }
     }
-}
-
-
-void trigger() {
-    digitalWrite(PIN_TRIGGER, HIGH);
-    delay(500);
-    digitalWrite(PIN_TRIGGER, LOW);
 }
 
 void loop() {
@@ -145,73 +125,41 @@ void loop() {
     if(now > last_tick + 100){
         last_tick = now;
 
-        switch(active_state){
-            default:
+        esp_state_t esp_state;
+        esp_state.sensor_gate_up   = (digitalRead(PIN_UP) == LOW ? SENSOR_ACTIVE : SENSOR_CLEAR);
+        esp_state.sensor_gate_down = (digitalRead(PIN_DN) == LOW ? SENSOR_ACTIVE : SENSOR_CLEAR);
+        esp_state.sensor_light_barrier = light_barrier.read(now);
+        esp_state.millis = now;
+
+        step_t step = state_machine.step(&esp_state);
+
+        switch(step.current_state){
             case GATE_INIT:
-                if( digitalRead(PIN_DN) == LOW ){
-                    active_state = GATE_CLOSED;
-                    hard_pos = "CLOSED";
-                }
-                else if( digitalRead(PIN_UP) == LOW ){
-                    active_state = GATE_OPEN;
-                    hard_pos = "OPEN";
-                }
-                else {
-                    active_state = GATE_UNKNOWN;
-                    hard_pos = "UNKNOWN";
-                }
+                strcpy(hard_pos, "INIT");
                 break;
 
             case GATE_OPEN:
-                hard_pos = "OPEN";
-                if( digitalRead(PIN_LB_BLOCKED) == LOW ){
-                    hard_pos = "BLOCKED";
-                    if(received_close_at != 0){
-                        client.publish("ctrl/tor/close_ack", "abort");
-                        received_close_at  = 0;
-                        received_commit_at = 0;
-                    }
-                }
-                else if( digitalRead(PIN_LB_CLEAR) == HIGH ){
-                    hard_pos = "ERROR";
-                }
-                else if( digitalRead(PIN_UP) != LOW ){
-                    active_state = GATE_UNKNOWN;
-                }
-                else if(received_close_at != 0){
-                    if( received_commit_at != 0 ){
-                        Serial.println(abs(received_close_at + 10000 - received_commit_at));
-                        if(abs(received_close_at + 10000 - received_commit_at) < 100){
-                            client.publish("ctrl/tor/close_ack", "closing");
-                            trigger();
-                        }
-                        received_close_at   = 0;
-                        received_commit_at  = 0;
-                    }
-                }
+            case GATE_CLOSE_AUTO:
+            case GATE_CLOSE_PREPARE:
+            case GATE_CLOSE_TRIGGERED:
+                strcpy(hard_pos, "OPEN");
+                break;
+
+            case GATE_BLOCKED:
+                strcpy(hard_pos, "BLOCKED");
                 break;
 
             case GATE_UNKNOWN:
-                hard_pos = "UNKNOWN";
-                received_close_at   = 0;
-                received_commit_at  = 0;
-                if( digitalRead(PIN_DN) == LOW ){
-                    active_state = GATE_CLOSED;
-                }
-                else if( digitalRead(PIN_UP) == LOW ){
-                    active_state = GATE_OPEN;
-                }
+                strcpy(hard_pos, "UNKNOWN");
                 break;
 
             case GATE_CLOSED:
-                hard_pos = "CLOSED";
-                received_close_at   = 0;
-                received_commit_at  = 0;
-                if( digitalRead(PIN_DN) != LOW ){
-                    active_state = GATE_UNKNOWN;
-                }
+                strcpy(hard_pos, "CLOSED");
                 break;
 
+            case GATE_ERROR:
+                strcpy(hard_pos, "ERROR");
+                break;
         }
 
         if(now > last_msg + 1000 || strcmp(hard_pos, prev_hard_pos) != 0){
@@ -221,6 +169,13 @@ void loop() {
 
             Serial.print("Hard position = ");
             Serial.println(hard_pos);
+        }
+
+        if (step.trigger) {
+            Serial.println("trigger! pew pew");
+            digitalWrite(PIN_TRIGGER, HIGH);
+            delay(500);
+            digitalWrite(PIN_TRIGGER, LOW);
         }
     }
 
