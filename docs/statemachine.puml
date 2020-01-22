@@ -36,6 +36,7 @@ GATE_CLOSE_PREPARE: * unset autoclose
 GATE_CLOSE_PREPARE: if not, go to GATE_OPEN
 
 GATE_CLOSE_PREPARE   -up->     GATE_BLOCKED         : Light Barrier Active
+GATE_CLOSE_PREPARE   -up->     GATE_UNKNOWN         : Sensor Up Clear\nalso needed from\nGATE_CLOSE_AUTO!
 GATE_CLOSE_PREPARE   -up->     GATE_OPEN            : MQTT Commit,\nwrong time
 GATE_CLOSE_PREPARE   -right->  GATE_CLOSE_TRIGGERED : MQTT Commit,\ncorrect time
 
