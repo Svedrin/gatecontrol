@@ -19,6 +19,7 @@ StateMachine::StateMachine() {
 step_t StateMachine::step(esp_state_t *esp_state) {
     step_t next_step;
     next_step.trigger = false;
+    next_step.autoclose_state = AUTOCLOSE_OFF;
     next_step.previous_state = this->current_state;
 
     if (
@@ -30,7 +31,6 @@ step_t StateMachine::step(esp_state_t *esp_state) {
     }
 
     switch(this->current_state){
-        default:
         case GATE_INIT:
             if( esp_state->sensor_gate_down == SENSOR_ACTIVE ){
                 this->current_state = GATE_CLOSED;
@@ -69,7 +69,27 @@ step_t StateMachine::step(esp_state_t *esp_state) {
 
         case GATE_BLOCKED:
             if( esp_state->sensor_light_barrier == SENSOR_CLEAR ){
+                if (false /* TODO: autoclose enabled */) {
+                    this->autoclose_timer_started_at = esp_state->millis;
+                    this->current_state = GATE_CLOSE_AUTO;
+                    next_step.autoclose_state = AUTOCLOSE_PENDING;
+                }
+                else {
+                    this->current_state = GATE_OPEN;
+                }
+            }
+            break;
+
+        case GATE_CLOSE_AUTO:
+            if( esp_state->sensor_light_barrier == SENSOR_ACTIVE ){
+                this->current_state = GATE_BLOCKED;
+            }
+            else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
+                this->current_state = GATE_UNKNOWN;
+            }
+            else if (esp_state->millis > this->autoclose_timer_started_at + 15000) {
                 this->current_state = GATE_OPEN;
+                next_step.autoclose_state = AUTOCLOSE_TRIGGERED;
             }
             break;
 

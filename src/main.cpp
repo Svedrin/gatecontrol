@@ -171,6 +171,13 @@ void loop() {
             Serial.println(hard_pos);
         }
 
+        if (step.autoclose_state == AUTOCLOSE_PENDING) {
+            client.publish("ctrl/tor/autoclose", "pending");
+        }
+        else if (step.autoclose_state == AUTOCLOSE_TRIGGERED) {
+            client.publish("ctrl/tor/autoclose", "triggered");
+        }
+
         if (step.trigger) {
             Serial.println("trigger! pew pew");
             digitalWrite(PIN_TRIGGER, HIGH);

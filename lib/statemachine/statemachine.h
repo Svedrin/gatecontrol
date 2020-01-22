@@ -24,8 +24,15 @@ typedef struct esp_state_t {
     unsigned long millis;
 } esp_state_t;
 
+typedef enum {
+    AUTOCLOSE_OFF,
+    AUTOCLOSE_PENDING,
+    AUTOCLOSE_TRIGGERED
+} autoclose_state_t;
+
 typedef struct {
     bool trigger;
+    autoclose_state_t autoclose_state;
     state_t previous_state;
     state_t current_state;
 } step_t;
@@ -35,6 +42,7 @@ class StateMachine {
         state_t current_state;
         unsigned long received_close_at;
         unsigned long received_commit_at;
+        unsigned long autoclose_timer_started_at;
 
     public:
         StateMachine();
