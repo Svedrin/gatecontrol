@@ -8,7 +8,7 @@ class MonitoredSensor {
         int when_active;     // Is the sensor active when the pin is LOW or when its HIGH?
 
         sensor_state_t last_valid_state;
-        int error_since;
+        unsigned long error_since;
 
         virtual int digital_read(int pin);
 
