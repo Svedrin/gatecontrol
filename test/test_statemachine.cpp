@@ -45,18 +45,15 @@ void given_gate_is_down() {
 }
 
 void given_light_barrier_is_clear() {
-    test_context->input.sensor_lb_clear   = SENSOR_ACTIVE;
-    test_context->input.sensor_lb_blocked = SENSOR_CLEAR;
+    test_context->input.sensor_light_barrier = SENSOR_CLEAR;
 }
 
 void given_light_barrier_is_blocked() {
-    test_context->input.sensor_lb_clear   = SENSOR_CLEAR;
-    test_context->input.sensor_lb_blocked = SENSOR_ACTIVE;
+    test_context->input.sensor_light_barrier = SENSOR_ACTIVE;
 }
 
 void given_light_barrier_is_broken() {
-    test_context->input.sensor_lb_clear   = SENSOR_CLEAR;
-    test_context->input.sensor_lb_blocked = SENSOR_CLEAR;
+    test_context->input.sensor_light_barrier = SENSOR_ERROR;
 }
 
 void when_time_passes(unsigned long millis) {
@@ -158,14 +155,14 @@ void test_remote_close_normal() {
     then_the_command_is(COMMAND_ACCEPTED);
 
     when_time_passes(800);
-    then_current_state_is(GATE_OPEN);
+    then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     when_mqtt_commit_command_arrives_at(10536);
     then_the_command_is(COMMAND_ACCEPTED);
 
     when_time_passes(1600);
-    then_current_state_is(GATE_OPEN);
+    then_current_state_is(GATE_CLOSE_TRIGGERED);
     then_we_trigger();
 
     given_gate_is_moving();
@@ -183,19 +180,21 @@ void test_remote_close_light_barrier_blocked() {
     given_light_barrier_is_blocked();
     when_time_passes(100);
     then_current_state_is(GATE_OPEN);
+    when_time_passes(200);
+    then_current_state_is(GATE_BLOCKED);
 
     when_mqtt_close_command_arrives_at(500);
-    then_the_command_is(COMMAND_ACCEPTED);
+    then_the_command_is(COMMAND_IGNORED);
 
     when_time_passes(800);
-    then_current_state_is(GATE_OPEN);
+    then_current_state_is(GATE_BLOCKED);
     then_we_do_not_trigger();
 
     when_mqtt_commit_command_arrives_at(10536);
-    then_the_command_is(COMMAND_ACCEPTED);
+    then_the_command_is(COMMAND_IGNORED);
 
     when_time_passes(1600);
-    then_current_state_is(GATE_OPEN);
+    then_current_state_is(GATE_BLOCKED);
     then_we_do_not_trigger();
 }
 
