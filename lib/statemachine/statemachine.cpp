@@ -3,7 +3,7 @@
 #else
 #define LOW 0
 #define HIGH 1
-unsigned long abs(unsigned long a) {
+unsigned long abs(long long a) {
     if (a < 0)
         return -a;
     return a;
@@ -14,6 +14,8 @@ unsigned long abs(unsigned long a) {
 
 StateMachine::StateMachine() {
     this->current_state = GATE_INIT;
+    this->received_close_at = 0;
+    this->received_commit_at = 0;
 }
 
 step_t StateMachine::step(esp_state_t *esp_state) {
@@ -80,4 +82,20 @@ step_t StateMachine::step(esp_state_t *esp_state) {
     }
     next_step.current_state = this->current_state;
     return next_step;
+}
+
+cmd_result_t StateMachine::cmd_close(unsigned long received_at) {
+    if(this->current_state == GATE_OPEN && this->received_close_at == 0){
+        received_close_at = received_at;
+        return COMMAND_ACCEPTED;
+    }
+    return COMMAND_IGNORED;
+}
+
+cmd_result_t StateMachine::cmd_commit(unsigned long received_at) {
+    if(this->current_state == GATE_OPEN && this->received_commit_at == 0){
+        received_commit_at = received_at;
+        return COMMAND_ACCEPTED;
+    }
+    return COMMAND_IGNORED;
 }

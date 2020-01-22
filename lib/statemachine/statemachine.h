@@ -6,6 +6,11 @@ typedef enum {
     GATE_ERROR
 } state_t;
 
+typedef enum {
+    COMMAND_ACCEPTED,
+    COMMAND_IGNORED
+} cmd_result_t;
+
 typedef struct esp_state_t {
     int pin_up;
     int pin_down;
@@ -29,4 +34,6 @@ class StateMachine {
     public:
         StateMachine();
         step_t step(esp_state_t *esp_state);
+        cmd_result_t cmd_close(unsigned long received_at);
+        cmd_result_t cmd_commit(unsigned long received_at);
 };
