@@ -1,3 +1,7 @@
+#ifndef UNIT_TEST
+#include <Arduino.h>
+#endif
+
 #include "monitoredsensor.h"
 
 MonitoredSensor::MonitoredSensor(int pin_active, int pin_monitor, int when_active) {
@@ -34,8 +38,6 @@ sensor_state_t MonitoredSensor::read(unsigned long millis) {
 }
 
 #ifndef UNIT_TEST
-#include <Arduino.h>
-
 int MonitoredSensor::digital_read(int pin) {
     return digitalRead(pin);
 }
