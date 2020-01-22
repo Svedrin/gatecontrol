@@ -22,8 +22,11 @@ GATE_BLOCKED: hard_state = "blocked"
 
 GATE_BLOCKED    -down->  GATE_CLOSE_AUTO    : Light Barrier Clear\nautoclose is set
 GATE_CLOSE_AUTO -up->    GATE_BLOCKED       : Light Barrier Active
-GATE_CLOSE_AUTO -right-> GATE_CLOSE_PREPARE : Timeout exceeded
+GATE_CLOSE_AUTO -up->    GATE_OPEN          : timeout
 GATE_CLOSE_AUTO : signal autoclose incoming
+GATE_CLOSE_AUTO : when timeout exceeded:
+GATE_CLOSE_AUTO : * signal "close me", but
+GATE_CLOSE_AUTO : * do _not_ just start moving\n   because we don't know if\n   the signal is working.\n   require a command for that
 
 GATE_OPEN    -down->  GATE_CLOSE_PREPARE : MQTT\nClose
 GATE_CLOSE_PREPARE: signal intent to close
@@ -46,7 +49,7 @@ GATE_CLOSE_TRIGGERED -right->  GATE_ERROR           : Gate won't move
 GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
 GATE_CLOSE_TRIGGERED: * signal gate moving
 
-GATE_ERROR           -up->     GATE_INIT            : Reset button
+GATE_ERROR           -right->  [*]
 GATE_ERROR: also used when one of
 GATE_ERROR: the other states detects
 GATE_ERROR: a broken sensor
