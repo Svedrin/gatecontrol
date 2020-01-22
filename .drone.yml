@@ -19,6 +19,7 @@ steps:
   - pip3 install platformio
   - platformio update
   - platformio platform install espressif8266
+  - platformio lib install PubSubClient
   - "[ ! -e include/WifiParams.h ] && cp ci/WifiParams.h include/"
   - pio run -e d1_mini
 
@@ -29,6 +30,6 @@ steps:
     - build
 ---
 kind: signature
-hmac: 3c74a68a01047a241152001f56d6c21a7ff8a4f9891130f1222e0fe332f0117b
+hmac: 6056d6a8f89748266507444b1377cfef0fb1e754035d2c2f600054aa530f37fe
 
 ...
