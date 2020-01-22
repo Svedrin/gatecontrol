@@ -2,10 +2,10 @@
 
 [*] --> GATE_INIT
 
-GATE_INIT    -down-> GATE_CLOSED : Sensor Down Active
-GATE_INIT    -down-> GATE_OPEN   : Sensor Up Active
+GATE_INIT    -down-> GATE_CLOSED   : Sensor Down Active
+GATE_INIT    -down-> GATE_OPEN     : Sensor Up Active
 
-GATE_BLOCKED -right-> GATE_OPEN    : Light Barrier Clear
+GATE_BLOCKED -right-> GATE_OPEN    : Light Barrier Clear\nautoclose not set
 GATE_OPEN    -left->  GATE_BLOCKED : Light Barrier Active
 
 GATE_UNKNOWN -right-> GATE_CLOSED  : Sensor Down Active
@@ -13,5 +13,40 @@ GATE_CLOSED  -left->  GATE_UNKNOWN : Sensor Down Clear
 
 GATE_OPEN    -right-> GATE_UNKNOWN : Sensor Up Clear
 GATE_UNKNOWN -left->  GATE_OPEN    : Sensor Up Active
+
+GATE_OPEN:    hard_state = "open"
+GATE_UNKNOWN: hard_state = "unknown"
+GATE_CLOSED:  hard_state = "closed"
+GATE_BLOCKED: hard_state = "blocked"
+
+
+GATE_BLOCKED    -down->  GATE_CLOSE_AUTO    : Light Barrier Clear\nautoclose is set
+GATE_CLOSE_AUTO -up->    GATE_BLOCKED       : Light Barrier Active
+GATE_CLOSE_AUTO -right-> GATE_CLOSE_PREPARE : Timeout exceeded
+GATE_CLOSE_AUTO : signal autoclose incoming
+
+GATE_OPEN    -down->  GATE_CLOSE_PREPARE : MQTT\nClose
+GATE_CLOSE_PREPARE: signal intent to close
+GATE_CLOSE_PREPARE: remember time of state entry
+GATE_CLOSE_PREPARE: when commit arrives:
+GATE_CLOSE_PREPARE: check if ~10 seconds elapsed
+GATE_CLOSE_PREPARE: if yes:
+GATE_CLOSE_PREPARE: * trigger motor
+GATE_CLOSE_PREPARE: * unset autoclose
+GATE_CLOSE_PREPARE: if not, go to GATE_OPEN
+
+GATE_CLOSE_PREPARE   -up->     GATE_BLOCKED         : Light Barrier Active
+GATE_CLOSE_PREPARE   -up->     GATE_OPEN            : MQTT Commit,\nwrong time
+GATE_CLOSE_PREPARE   -right->  GATE_CLOSE_TRIGGERED : MQTT Commit,\ncorrect time
+
+GATE_CLOSE_TRIGGERED -up->     GATE_UNKNOWN         : Sensor Up Clear
+GATE_CLOSE_TRIGGERED -right->  GATE_ERROR           : Gate won't move
+GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
+GATE_CLOSE_TRIGGERED: * signal gate moving
+
+GATE_ERROR           -up->     GATE_INIT            : Reset button
+GATE_ERROR: also used when one of
+GATE_ERROR: the other states detects
+GATE_ERROR: a broken sensor
 
 @enduml
