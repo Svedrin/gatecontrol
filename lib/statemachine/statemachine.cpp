@@ -1,8 +1,6 @@
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #else
-#define LOW 0
-#define HIGH 1
 unsigned long abs(long long a) {
     if (a < 0)
         return -a;
@@ -25,10 +23,10 @@ step_t StateMachine::step(esp_state_t *esp_state) {
     switch(this->current_state){
         default:
         case GATE_INIT:
-            if( esp_state->sensor_gate_down == LOW ){
+            if( esp_state->sensor_gate_down == SENSOR_ACTIVE ){
                 this->current_state = GATE_CLOSED;
             }
-            else if( esp_state->sensor_gate_up == LOW ){
+            else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
                 this->current_state = GATE_OPEN;
             }
             else {
@@ -37,16 +35,16 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             break;
 
         case GATE_OPEN:
-            if( esp_state->sensor_lb_blocked == LOW ){
+            if( esp_state->sensor_lb_blocked == SENSOR_ACTIVE ){
                 if(this->received_close_at != 0){
                     this->received_close_at  = 0;
                     this->received_commit_at = 0;
                 }
             }
-            else if( esp_state->sensor_lb_clear == HIGH ){
+            else if( esp_state->sensor_lb_clear == SENSOR_CLEAR ){
                 this->current_state = GATE_ERROR;
             }
-            else if( esp_state->sensor_gate_up != LOW ){
+            else if( esp_state->sensor_gate_up != SENSOR_ACTIVE ){
                 this->current_state = GATE_UNKNOWN;
             }
             else if(this->received_close_at  != 0 ){
@@ -63,10 +61,10 @@ step_t StateMachine::step(esp_state_t *esp_state) {
         case GATE_UNKNOWN:
             this->received_close_at   = 0;
             this->received_commit_at  = 0;
-            if( esp_state->sensor_gate_down == LOW ){
+            if( esp_state->sensor_gate_down == SENSOR_ACTIVE ){
                 this->current_state = GATE_CLOSED;
             }
-            else if( esp_state->sensor_gate_up == LOW ){
+            else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
                 this->current_state = GATE_OPEN;
             }
             break;
@@ -74,7 +72,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
         case GATE_CLOSED:
             this->received_close_at   = 0;
             this->received_commit_at  = 0;
-            if( esp_state->sensor_gate_down != LOW ){
+            if( esp_state->sensor_gate_down != SENSOR_ACTIVE ){
                 this->current_state = GATE_UNKNOWN;
             }
             break;

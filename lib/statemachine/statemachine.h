@@ -7,20 +7,21 @@ typedef enum {
 } state_t;
 
 typedef enum {
-    COMMAND_ACCEPTED,
-    COMMAND_IGNORED
+    COMMAND_IGNORED,
+    COMMAND_ACCEPTED
 } cmd_result_t;
 
 typedef enum {
-    SENSOR_CLEAR,
-    SENSOR_ACTIVE
+    SENSOR_CLEAR,  // Sensor does not signal anything
+    SENSOR_ACTIVE, // Sensor has detected something
+    SENSOR_ERROR   // Sensor is gone (hardware issue, e.g. unplugged)
 } sensor_state_t;
 
 typedef struct esp_state_t {
-    int sensor_gate_up;
-    int sensor_gate_down;
-    int sensor_lb_blocked;
-    int sensor_lb_clear;
+    sensor_state_t sensor_gate_up;
+    sensor_state_t sensor_gate_down;
+    sensor_state_t sensor_lb_blocked;
+    sensor_state_t sensor_lb_clear;
     unsigned long millis;
 } esp_state_t;
 
