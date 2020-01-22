@@ -86,17 +86,39 @@ void when_mqtt_commit_command_arrives_at(unsigned long millis) {
     TEST_ASSERT_TRUE(test_context->result.trigger)
 
 /**
- * Da basics
+ * Chapter one: Da basics.
+ *
+ * Let's check that simple state tracking works.
  */
 
 void test_init_open() {
     given_gate_is_up();
+    then_current_state_is(GATE_INIT);
+
     when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
+
+    given_gate_is_moving();
+    when_time_passes(20);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_down();
+    when_time_passes(30);
+    then_current_state_is(GATE_CLOSED);
+
+    given_gate_is_moving();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_up();
+    when_time_passes(50);
     then_current_state_is(GATE_OPEN);
 }
 
 void test_init_closed() {
     given_gate_is_down();
+    then_current_state_is(GATE_INIT);
+
     when_time_passes(10);
     then_current_state_is(GATE_CLOSED);
 
@@ -117,6 +139,15 @@ void test_init_closed() {
     then_current_state_is(GATE_CLOSED);
 }
 
+/**
+ * Chapter two: Remote close, non-edge cases.
+ *
+ * This operation requires a two-phase commit, where a central orchestrator
+ * first sends a "CLOSE" command, followed by a "COMMIT" ~10 seconds later.
+ * We rely on them to issue appropriate warnings in the meantime.
+ * Let's make sure this works correctly, but let's not be mean just yet.
+ */
+
 void test_remote_close_normal() {
     given_gate_is_up();
     given_light_barrier_is_clear();
@@ -136,8 +167,17 @@ void test_remote_close_normal() {
     when_time_passes(1600);
     then_current_state_is(GATE_OPEN);
     then_we_trigger();
+
+    given_gate_is_moving();
+    when_time_passes(1700);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_down();
+    when_time_passes(1800);
+    then_current_state_is(GATE_CLOSED);
 }
 
+// When the light barrier is blocked, we must not trigger.
 void test_remote_close_light_barrier_blocked() {
     given_gate_is_up();
     given_light_barrier_is_blocked();
@@ -156,5 +196,49 @@ void test_remote_close_light_barrier_blocked() {
 
     when_time_passes(1600);
     then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
+}
+
+// When the gate is closed, we must not trigger (and thereby open it)
+void test_remote_close_when_already_closed() {
+    given_gate_is_down();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
+
+    when_mqtt_close_command_arrives_at(500);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(800);
+    then_current_state_is(GATE_CLOSED);
+    then_we_do_not_trigger();
+
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(1600);
+    then_current_state_is(GATE_CLOSED);
+    then_we_do_not_trigger();
+}
+
+// When the gate position is unknown, we must not trigger
+void test_remote_close_when_position_unknown() {
+    given_gate_is_moving();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    then_current_state_is(GATE_UNKNOWN);
+
+    when_mqtt_close_command_arrives_at(500);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(800);
+    then_current_state_is(GATE_UNKNOWN);
+    then_we_do_not_trigger();
+
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(1600);
+    then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
 }
