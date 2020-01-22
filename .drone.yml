@@ -12,9 +12,10 @@ steps:
   - pio test -e native
 
 - name: build
-  image: python:alpine
+  image: debian:buster-slim
   commands:
-  - apk add --no-cache g++
+  - apt-get update
+  - apt-get install g++ python3-pip
   - pip3 install platformio
   - platformio update
   - platformio platform install espressif8266
@@ -28,6 +29,6 @@ steps:
     - build
 ---
 kind: signature
-hmac: fbe9f12fb5c9e6449c337cf36d500f7dd5e2f320cdda3351553d50571d5f472e
+hmac: 0a64476d47075043c5f1707ab28b38ed48bad7cae9284a14354fe86385a79a8f
 
 ...
