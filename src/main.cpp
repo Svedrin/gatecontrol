@@ -166,6 +166,7 @@ void loop() {
         esp_state_t esp_state;
         esp_state.sensor_gate_up   = (digitalRead(PIN_UP) == LOW ? SENSOR_ACTIVE : SENSOR_CLEAR);
         esp_state.sensor_gate_down = (digitalRead(PIN_DN) == LOW ? SENSOR_ACTIVE : SENSOR_CLEAR);
+        esp_state.button_autoclose = (digitalRead(PIN_AUTOCLOSE) == LOW ? SENSOR_ACTIVE : SENSOR_CLEAR);
         esp_state.sensor_light_barrier = light_barrier.read(now);
         esp_state.millis = now;
 
@@ -192,6 +193,7 @@ void loop() {
                 break;
 
             case GATE_CLOSED:
+            case GATE_OPEN_TRIGGERED:
                 strcpy(hard_pos, "CLOSED");
                 break;
 
@@ -220,16 +222,13 @@ void loop() {
         }
 
         // Drive the status LED.
-        // When autoclose is enabled and waiting, light up statically
-        if (step.current_state == GATE_CLOSE_AUTO) {
-            digitalWrite(PIN_STATUSLED, HIGH);
-        }
         // When we received a CLOSE command, blink (by only lighting
         // up for the second half of each second)
-        else if (
-            step.current_state == GATE_CLOSE_PREPARE &&
-            now % 1000 > 500
-        ) {
+        if (step.current_state == GATE_CLOSE_PREPARE) {
+            digitalWrite(PIN_STATUSLED, (now % 1000 > 500 ? HIGH : LOW));
+        }
+        // When autoclose is enabled, light up statically
+        else if (step.autoclose_state == AUTOCLOSE_ON) {
             digitalWrite(PIN_STATUSLED, HIGH);
         }
         // Otherwise, go dark

@@ -9,6 +9,7 @@ typedef enum {
     GATE_CLOSE_AUTO,      // Autoclose is enabled, timeout not yet expired
     GATE_CLOSE_PREPARE,   // We received a CLOSE command, waiting for COMMIT
     GATE_CLOSE_TRIGGERED, // COMMIT happened, gate triggered, waiting for it to move
+    GATE_OPEN_TRIGGERED,  // AutoClose button pushed when gate closed -> open
     GATE_ERROR
 } state_t;
 
@@ -21,11 +22,13 @@ typedef struct esp_state_t {
     sensor_state_t sensor_gate_up;
     sensor_state_t sensor_gate_down;
     sensor_state_t sensor_light_barrier;
+    sensor_state_t button_autoclose;
     unsigned long millis;
 } esp_state_t;
 
 typedef enum {
     AUTOCLOSE_OFF,
+    AUTOCLOSE_ON,
     AUTOCLOSE_PENDING,
     AUTOCLOSE_TRIGGERED
 } autoclose_state_t;
@@ -43,6 +46,7 @@ class StateMachine {
         unsigned long received_close_at;
         unsigned long received_commit_at;
         unsigned long autoclose_timer_started_at;
+        bool autoclose_enabled;
 
     public:
         StateMachine();

@@ -15,15 +15,17 @@ unsigned long abs(long long a) {
 
 StateMachine::StateMachine() {
     this->current_state = GATE_INIT;
-    this->received_close_at = 0;
+    this->received_close_at  = 0;
     this->received_commit_at = 0;
+    this->autoclose_enabled  = false;
 }
 
 step_t StateMachine::step(esp_state_t *esp_state) {
     step_t next_step;
     next_step.trigger = false;
-    next_step.autoclose_state = AUTOCLOSE_OFF;
     next_step.previous_state = this->current_state;
+    next_step.autoclose_state =
+        (this->autoclose_enabled ? AUTOCLOSE_ON : AUTOCLOSE_OFF);
 
     if (
         esp_state->sensor_gate_up       == SENSOR_ERROR ||
@@ -53,6 +55,10 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
             }
+            else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
+                this->autoclose_enabled = true;
+                next_step.autoclose_state = AUTOCLOSE_ON;
+            }
             break;
 
         case GATE_UNKNOWN:
@@ -68,11 +74,17 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             if( esp_state->sensor_gate_down == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
             }
+            else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
+                this->autoclose_enabled = true;
+                this->current_state = GATE_OPEN_TRIGGERED;
+                next_step.autoclose_state = AUTOCLOSE_ON;
+                next_step.trigger = true;
+            }
             break;
 
         case GATE_BLOCKED:
             if( esp_state->sensor_light_barrier == SENSOR_CLEAR ){
-                if (false /* TODO: autoclose enabled */) {
+                if (this->autoclose_enabled) {
                     this->autoclose_timer_started_at = esp_state->millis;
                     this->current_state = GATE_CLOSE_AUTO;
                     next_step.autoclose_state = AUTOCLOSE_PENDING;
@@ -115,7 +127,9 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             ) {
                 // Commit came, and on time
                 next_step.trigger = true;
+                next_step.autoclose_state = AUTOCLOSE_OFF;
                 this->current_state = GATE_CLOSE_TRIGGERED;
+                this->autoclose_enabled = false;
             }
             else {
                 // Commit came, but time was off
@@ -132,6 +146,15 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             ) {
                 // 5 seconds should more than suffice, something's wrong
                 this->current_state = GATE_ERROR;
+            }
+            break;
+
+        case GATE_OPEN_TRIGGERED:
+            if (esp_state->sensor_gate_down == SENSOR_CLEAR) {
+                this->current_state = GATE_UNKNOWN;
+            }
+            else if (esp_state->button_autoclose == SENSOR_CLEAR) {
+                this->current_state = GATE_CLOSED;
             }
             break;
 
