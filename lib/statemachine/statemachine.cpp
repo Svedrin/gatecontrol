@@ -31,7 +31,8 @@ step_t StateMachine::step(esp_state_t *esp_state) {
     if (
         esp_state->sensor_gate_up       == SENSOR_ERROR ||
         esp_state->sensor_gate_down     == SENSOR_ERROR ||
-        esp_state->sensor_light_barrier == SENSOR_ERROR
+        esp_state->sensor_light_barrier == SENSOR_ERROR ||
+        esp_state->button_autoclose     == SENSOR_ERROR
     ) {
         this->current_state = GATE_ERROR;
     }
