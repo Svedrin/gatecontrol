@@ -51,6 +51,11 @@ All inputs need to be pulled low when they are active, and high otherwise.
 | Lightbarrier clear   | D7            | Error LED    |                        |
 |                      | D8            | Status LED   |                        |
 
+# LEDs
+
+* Error LED: Blinks while connecting to WiFi, off while running, static when error
+* Status LED: Static when autoclose enabled, blinks when about to close
+
 # State Machine
 
 ![statemachine](docs/statemachine.png)

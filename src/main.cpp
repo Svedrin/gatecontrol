@@ -12,12 +12,15 @@
 #include <monitoredsensor.h>
 #include <statemachine.h>
 
-#define PIN_UP D1
-#define PIN_DN D2
-
-#define PIN_TRIGGER D5
-#define PIN_LB_BLOCKED D6     // Light barrier says "I'm blocked"
-#define PIN_LB_CLEAR   D7     // Light barrier says "I'm clear"
+#define PIN_MON        D0 // Low while all sensors are working
+#define PIN_UP         D1 // Low when the gate is up
+#define PIN_DN         D2 // Low when the gate is down
+#define PIN_AUTOCLOSE  D3 // Low when user presses the autoclose button
+#define PIN_ERRORLED   D4 // Blinks while connecting, off while running, static when error
+#define PIN_TRIGGER    D5 // Relay that triggers the gate
+#define PIN_LB_BLOCKED D6 // Light barrier says "I'm blocked"
+#define PIN_LB_CLEAR   D7 // Light barrier says "I'm clear"
+#define PIN_STATUSLED  D8 // Static when autoclose enabled, blinks when about to close
 
 WiFiClient espClient;
 PubSubClient client(espClient);
