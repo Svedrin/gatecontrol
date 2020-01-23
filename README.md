@@ -45,11 +45,11 @@ All inputs need to be pulled low when they are active, and high otherwise.
 | Sensor Up            | D1            |              | needs external pull-up |
 | Sensor Down          | D2            |              | needs external pull-up |
 | Autoclose button     | D3            |              | must not be pulled low during boot |
-|                      | D4            | Error LED    | ESP on-board LED       |
-|                      | D5            | Gate Trigger |                        |
+|                      | D4            | Error LED    | ESP on-board LED, LOW = on       |
+|                      | D5            | Gate Trigger | HIGH = on              |
 | Lightbarrier blocked | D6            | Error LED    |                        |
 | Lightbarrier clear   | D7            | Error LED    |                        |
-|                      | D8            | Status LED   |                        |
+|                      | D8            | Status LED   | HIGH = on              |
 
 # LEDs
 
