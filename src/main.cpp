@@ -95,15 +95,19 @@ void setup(void)
     Serial.println(mqtt_topic_state);
 
     // Connect to WiFi
+    int led_state = LOW;
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     WiFi.mode(WIFI_STA);
     Serial.println();
     while (WiFi.status() != WL_CONNECTED) {
+        digitalWrite(PIN_ERRORLED, led_state);
+        led_state = (led_state == HIGH ? LOW : HIGH);
         delay(500);
         Serial.print(".");
     }
     Serial.println("");
     Serial.println("WiFi connected");
+    digitalWrite(PIN_ERRORLED,  HIGH);
 
     // Print the IP address
     Serial.println(WiFi.localIP());
@@ -193,6 +197,7 @@ void loop() {
 
             case GATE_ERROR:
                 strcpy(hard_pos, "ERROR");
+                digitalWrite(PIN_ERRORLED, LOW);
                 break;
         }
 
