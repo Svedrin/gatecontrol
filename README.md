@@ -6,7 +6,7 @@ ESP8266 firmware that implements a garage gate controller.
 
 You'll need:
 
-* a garage gate equipped with a mo<ChipID>
+* a garage gate equipped with a motor
 * one sensor each at the top and bottom end positions to locate the gate
 * a light barrier
 * WiFi, MQTT
