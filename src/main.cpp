@@ -7,7 +7,6 @@
 
 // this file #defines WIFI_SSID and WIFI_PASSWORD
 #include <WifiParams.h>
-#include "main.h"
 
 #include <monitoredsensor.h>
 #include <statemachine.h>
