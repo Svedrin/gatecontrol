@@ -53,6 +53,8 @@ All inputs need to be pulled low when they are active, and high otherwise.
 
 Note that while it would probably be better to drive the Status LED and the trigger relay by pulling their pins LOW, we can't really do that since that would incur quirky boot behavior. We really do _not_ want the gate to start moving uncontrollably whenever the ESP is reset, and those pins are pulled LOW during boot, so LOW _must_ mean "off".
 
+Also note that I'm thinking about re-using the Status LED to also drive a relay to enable the Light Barrier only when needed. In that case its behavior would change, because blinking would be a really bad idea (or I'd need to debounce that in the hardware, ugh).
+
 # LEDs
 
 * Error LED: Blinks while connecting to WiFi, off while running, static when error
