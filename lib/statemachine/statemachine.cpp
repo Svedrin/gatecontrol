@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #else
@@ -157,3 +160,5 @@ cmd_result_t StateMachine::cmd_commit(unsigned long received_at) {
     }
     return COMMAND_IGNORED;
 }
+
+#pragma GCC diagnostic pop // Restore compiler settings

@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 // kate: hl c++
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -188,3 +191,5 @@ void loop() {
 
     delay(1);
 }
+
+#pragma GCC diagnostic pop // Restore compiler settings

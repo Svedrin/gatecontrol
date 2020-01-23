@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 #include <unity.h>
 #include "monitoredsensor.h"
 #include "test_monitoredsensor.h"
@@ -74,3 +77,5 @@ void test_monitoredsensor() {
     sensor.set_pin_states(0, 1);
     TEST_ASSERT_EQUAL(SENSOR_ACTIVE, sensor.read(400));
 }
+
+#pragma GCC diagnostic pop // Restore compiler settings

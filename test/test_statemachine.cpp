@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 #include <unity.h>
 #include "statemachine.h"
 #include "test_statemachine.h"
@@ -241,3 +244,5 @@ void test_remote_close_when_position_unknown() {
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
 }
+
+#pragma GCC diagnostic pop // Restore compiler settings

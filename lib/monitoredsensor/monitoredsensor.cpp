@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 #ifndef UNIT_TEST
 #include <Arduino.h>
 #endif
@@ -60,3 +63,5 @@ int TestableMonitoredSensor::digital_read(int pin) {
     return this->pin_monitor_state;
 }
 #endif
+
+#pragma GCC diagnostic pop // Restore compiler settings

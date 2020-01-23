@@ -1,3 +1,6 @@
+#pragma GCC diagnostic push  // save compiler settings
+#pragma GCC diagnostic error "-Wall"
+
 #include <unity.h>
 #include "test_statemachine.h"
 #include "test_monitoredsensor.h"
@@ -18,3 +21,5 @@ int main( int argc, char **argv) {
 
     UNITY_END();
 }
+
+#pragma GCC diagnostic pop // Restore compiler settings
