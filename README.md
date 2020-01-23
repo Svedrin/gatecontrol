@@ -33,6 +33,24 @@ This scheme basically implements [two-phase commit](https://en.wikipedia.org/wik
 
 When you want to leave the garage, having to close the gate manually can be a nuisance. Thus the controller supports autoclose, through a separate physical button connected to one of the inputs. The controller then moni<ChipID>s the light barrier, and if it was clear for a while, automatically closes the gate. Again, using the status indications published on `ctrl/<ChipID>/autoclose` to drive a signal light is highly encouraged.
 
+# ESP Pinout
+
+Here's how things need to be connected to the ESP. Comments indicate glitches and caveats, most of which are to do with earlier versions of my PCB being less than ideal. I'll probably need to re-do mine so that I can fix these.
+
+All inputs need to be pulled low when they are active, and high otherwise.
+
+| Input                | Pin           | Output       | Comment                |
+| -------------------- | ------------- | ------------ | ---------------------- |
+| Sensor Monitor       | D0            |              | not yet implemented    |
+| Sensor Up            | D1            |              | needs external pull-up |
+| Sensor Down          | D2            |              | needs external pull-up |
+| Autoclose button     | D3            |              | must not be pulled low during boot |
+|                      | D4            | Error LED    | ESP on-board LED       |
+|                      | D5            | Gate Trigger |                        |
+| Lightbarrier blocked | D6            | Error LED    |                        |
+| Lightbarrier clear   | D7            | Error LED    |                        |
+|                      | D8            | Status LED   |                        |
+
 # State Machine
 
 ![statemachine](docs/statemachine.png)
