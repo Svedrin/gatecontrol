@@ -210,11 +210,31 @@ void loop() {
             Serial.println(hard_pos);
         }
 
+        // autoclose_state indicates when certain events have happened
+        // and are only set for the one step where they happened
         if (step.autoclose_state == AUTOCLOSE_PENDING) {
             client.publish(mqtt_topic_autoclose, "pending");
         }
         else if (step.autoclose_state == AUTOCLOSE_TRIGGERED) {
             client.publish(mqtt_topic_autoclose, "triggered");
+        }
+
+        // Drive the status LED.
+        // When autoclose is enabled and waiting, light up statically
+        if (step.current_state == GATE_CLOSE_AUTO) {
+            digitalWrite(PIN_STATUSLED, HIGH);
+        }
+        // When we received a CLOSE command, blink (by only lighting
+        // up for the second half of each second)
+        else if (
+            step.current_state == GATE_CLOSE_PREPARE &&
+            now % 1000 > 500
+        ) {
+            digitalWrite(PIN_STATUSLED, HIGH);
+        }
+        // Otherwise, go dark
+        else {
+            digitalWrite(PIN_STATUSLED, LOW);
         }
 
         if (step.trigger) {
