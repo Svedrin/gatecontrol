@@ -95,13 +95,13 @@ void setup(void)
     Serial.println(mqtt_topic_state);
 
     // Connect to WiFi
-    int led_state = LOW;
+    int error_led_state = LOW;
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     WiFi.mode(WIFI_STA);
     Serial.println();
     while (WiFi.status() != WL_CONNECTED) {
-        digitalWrite(PIN_ERRORLED, led_state);
-        led_state = (led_state == HIGH ? LOW : HIGH);
+        digitalWrite(PIN_ERRORLED, error_led_state);
+        error_led_state = (error_led_state == HIGH ? LOW : HIGH);
         delay(500);
         Serial.print(".");
     }
