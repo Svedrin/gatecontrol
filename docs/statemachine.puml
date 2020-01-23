@@ -58,6 +58,7 @@ GATE_CLOSED         -down-> GATE_OPEN_TRIGGERED : Autoclose\nButton\npressed
 GATE_OPEN_TRIGGERED -up->   GATE_CLOSED         : Button\nreleased
 GATE_OPEN_TRIGGERED -up->   GATE_UNKNOWN        : Sensor Down Clear
 GATE_OPEN_TRIGGERED -down-> GATE_ERROR          : Gate won't move
+GATE_OPEN_TRIGGERED: * exists to make sure\n   we trigger only once
 
 any -right-> GATE_ERROR : Sensor reports error
 

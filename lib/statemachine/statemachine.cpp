@@ -65,6 +65,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
         case GATE_UNKNOWN:
             if( esp_state->sensor_gate_down == SENSOR_ACTIVE ){
                 this->current_state = GATE_CLOSED;
+                this->autoclose_enabled = false;
             }
             else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
                 this->current_state = GATE_OPEN;
@@ -81,6 +82,13 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                 this->triggered_at  = esp_state->millis;
                 next_step.autoclose_state = AUTOCLOSE_ON;
                 next_step.trigger = true;
+            }
+            else if (
+                this->autoclose_enabled &&
+                esp_state->millis > this->triggered_at + 5000
+            ) {
+                // 5 seconds should more than suffice, something's wrong
+                this->current_state = GATE_ERROR;
             }
             break;
 
