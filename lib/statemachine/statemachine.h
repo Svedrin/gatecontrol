@@ -1,5 +1,10 @@
 #include <sensorstate.h>
 
+// After autoclose is triggered, users need to block the light barrier once
+// for the whole process to start. How long do we wait for that to happen
+// before we cancel the whole process?
+#define AUTOCLOSE_TIMEOUT 60000
+
 typedef enum {
     GATE_INIT,            // State used for the first reading after boot
     GATE_OPEN,            // Gate is full open (top sensor is low)
@@ -47,7 +52,7 @@ class StateMachine {
         unsigned long received_commit_at;
         unsigned long autoclose_timer_started_at;
         unsigned long triggered_at;
-        bool autoclose_enabled;
+        unsigned long autoclose_enabled_at;
 
     public:
         StateMachine();

@@ -439,5 +439,34 @@ void test_autoclose_from_open() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+void test_autoclose_timeout() {
+    // Enable autoclose while the gate's open (shorter)
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_autoclose_button_is_released();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(60050);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    // The state above got reported by the code that ran
+    // the state change; check that it also persisted it
+    when_time_passes(60060);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+}
 
 #pragma GCC diagnostic pop // Restore compiler settings

@@ -18,6 +18,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_autoclose_normal);
     RUN_TEST(test_autoclose_cancel);
     RUN_TEST(test_autoclose_from_open);
+    RUN_TEST(test_autoclose_timeout);
 
     // MonitoredSensor tests
     RUN_TEST(test_monitoredsensor);
