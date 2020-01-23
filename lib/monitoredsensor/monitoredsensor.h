@@ -1,6 +1,9 @@
 #pragma once
 #include "sensorstate.h"
 
+// How long do we debounce inputs for until we go into ERROR state?
+#define SENSOR_ERROR_DEBOUNCE_PERIOD 50
+
 class MonitoredSensor {
     protected:
         int pin_active;

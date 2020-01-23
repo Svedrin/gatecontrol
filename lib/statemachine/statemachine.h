@@ -5,6 +5,16 @@
 // before we cancel the whole process?
 #define AUTOCLOSE_TIMEOUT 60000
 
+// How long do we wait after the light barrier becomes clear, before we
+// initiate the close procedure?
+#define AUTOCLOSE_WAIT_PERIOD 15000
+
+// When we trigger the gate, after how much time do we expect it to get moving?
+#define GATE_ERROR_TIMEOUT 5000
+
+// When we receive a CLOSE command, after which time period do we expect a COMMIT?
+#define CLOSE_TILL_COMMIT 10000
+
 typedef enum {
     GATE_INIT,            // State used for the first reading after boot
     GATE_OPEN,            // Gate is full open (top sensor is low)

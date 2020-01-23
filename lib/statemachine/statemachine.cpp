@@ -93,7 +93,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if (
                 this->autoclose_enabled_at &&
-                esp_state->millis > this->triggered_at + 5000
+                esp_state->millis > this->triggered_at + GATE_ERROR_TIMEOUT
             ) {
                 // 5 seconds should more than suffice, something's wrong
                 this->current_state = GATE_ERROR;
@@ -120,7 +120,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
             }
-            else if (esp_state->millis > this->autoclose_timer_started_at + 15000) {
+            else if (esp_state->millis > this->autoclose_timer_started_at + AUTOCLOSE_WAIT_PERIOD) {
                 this->current_state = GATE_OPEN;
                 next_step.autoclose_state = AUTOCLOSE_TRIGGERED;
             }
@@ -135,13 +135,13 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if (this->received_commit_at == 0) {
                 // No commit yet, see if that means anything
-                if (esp_state->millis > this->received_close_at + 10100) {
+                if (esp_state->millis > this->received_close_at + CLOSE_TILL_COMMIT + 100) {
                     // Commit timed out
                     this->current_state = GATE_OPEN;
                 }
             }
             else if (
-                abs(received_close_at + 10000 - received_commit_at) < 100
+                abs(received_close_at + CLOSE_TILL_COMMIT - received_commit_at) < 100
             ) {
                 // Commit came, and on time
                 next_step.trigger = true;
@@ -160,7 +160,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
             }
-            else if (esp_state->millis > this->triggered_at + 5000) {
+            else if (esp_state->millis > this->triggered_at + GATE_ERROR_TIMEOUT) {
                 // 5 seconds should more than suffice, something's wrong
                 this->current_state = GATE_ERROR;
             }
@@ -170,7 +170,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             if (esp_state->sensor_gate_down == SENSOR_CLEAR) {
                 this->current_state = GATE_UNKNOWN;
             }
-            else if (esp_state->millis > this->triggered_at + 5000) {
+            else if (esp_state->millis > this->triggered_at + GATE_ERROR_TIMEOUT) {
                 // 5 seconds should more than suffice, something's wrong
                 this->current_state = GATE_ERROR;
             }

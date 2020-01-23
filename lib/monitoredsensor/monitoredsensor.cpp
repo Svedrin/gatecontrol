@@ -30,7 +30,7 @@ sensor_state_t MonitoredSensor::read(unsigned long millis) {
         // Both are gone. let's debounce this for 50ms
         this->error_since = millis;
         return this->last_valid_state;
-    } else if (millis < this->error_since + 50) {
+    } else if (millis < this->error_since + SENSOR_ERROR_DEBOUNCE_PERIOD) {
         // debounce period not yet expired
         return this->last_valid_state;
     } else {
