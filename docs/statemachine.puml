@@ -4,6 +4,7 @@
 
 GATE_INIT    -down-> GATE_CLOSED   : Sensor Down Active
 GATE_INIT    -down-> GATE_OPEN     : Sensor Up Active
+GATE_INIT    -down-> GATE_UNKNOWN  : neither
 
 GATE_BLOCKED -right-> GATE_OPEN    : Light Barrier Clear\nautoclose not set
 GATE_OPEN    -left->  GATE_BLOCKED : Light Barrier Active
