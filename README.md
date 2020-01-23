@@ -51,6 +51,8 @@ All inputs need to be pulled low when they are active, and high otherwise.
 | Lightbarrier clear   | D7            | Error LED    |                        |
 |                      | D8            | Status LED   | HIGH = on              |
 
+Note that while it would probably be better to drive the Status LED and the trigger relay by pulling their pins LOW, we can't really do that since that would incur quirky boot behavior. We really do _not_ want the gate to start moving uncontrollably whenever the ESP is reset, and those pins are pulled LOW during boot, so LOW _must_ mean "off".
+
 # LEDs
 
 * Error LED: Blinks while connecting to WiFi, off while running, static when error
