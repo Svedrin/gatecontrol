@@ -8,6 +8,9 @@
 int main( int argc, char **argv) {
     UNITY_BEGIN();
 
+    // MonitoredSensor tests
+    RUN_TEST(test_monitoredsensor);
+
     // StateMachine tests
     RUN_TEST(test_init_open);
     RUN_TEST(test_init_closed);
@@ -19,9 +22,6 @@ int main( int argc, char **argv) {
     RUN_TEST(test_autoclose_cancel);
     RUN_TEST(test_autoclose_from_open);
     RUN_TEST(test_autoclose_timeout);
-
-    // MonitoredSensor tests
-    RUN_TEST(test_monitoredsensor);
 
     UNITY_END();
 }
