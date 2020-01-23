@@ -29,6 +29,17 @@ unsigned long last_msg;
 char hard_pos[50];
 char prev_hard_pos[50];
 
+char mqtt_topic_state[50];
+char mqtt_topic_commands[50];
+char mqtt_topic_command_acks[50];
+char mqtt_topic_autoclose[50];
+
+#define MQTT_TOPIC(which_one, topic_suffix) strncpy( \
+        which_one, \
+        ("ctrl/" + String(ESP.getChipId(), HEX) + "/" + topic_suffix).c_str(), \
+        sizeof(which_one) \
+    )
+
 void on_mqtt_message(char* topic, byte* payload, unsigned int length);
 
 void reconnect() {
@@ -38,7 +49,7 @@ void reconnect() {
         // Attempt to connect
         String clientId = "ESP8266Client-" + String(ESP.getChipId(), HEX);
         if (client.connect(clientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
-            client.subscribe("ctrl/tor/set_hard_position");
+            client.subscribe(mqtt_topic_commands);
             Serial.println("connected");
         } else {
             Serial.print("failed, rc=");
@@ -54,6 +65,15 @@ void setup(void)
 {
     // Start Serial
     Serial.begin(115200);
+
+    // Populate topic names
+    MQTT_TOPIC(mqtt_topic_state,        "current_hard_position");
+    MQTT_TOPIC(mqtt_topic_commands,     "set_hard_position");
+    MQTT_TOPIC(mqtt_topic_command_acks, "close_ack");
+    MQTT_TOPIC(mqtt_topic_autoclose,    "autoclose");
+
+    Serial.print("State topic: ");
+    Serial.println(mqtt_topic_state);
 
     // Connect to WiFi
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -100,17 +120,17 @@ void on_mqtt_message(char* topic, byte* payload, unsigned int length) {
     Serial.print("] = ");
     Serial.print(buf);
 
-    if( strcmp(topic, "ctrl/tor/set_hard_position") == 0 ){
+    if( strcmp(topic, mqtt_topic_commands) == 0 ){
         if(strncmp((const char *)payload, "CLOSED", length) == 0){
             Serial.println("Received CLOSE message");
             if(state_machine.cmd_close(millis()) == COMMAND_ACCEPTED){
-                client.publish("ctrl/tor/close_ack", "waiting");
+                client.publish(mqtt_topic_command_acks, "waiting");
             }
         }
         else if(strncmp((const char *)payload, "COMMIT", length) == 0){
             Serial.println("Received COMMIT message");
             if(state_machine.cmd_commit(millis()) == COMMAND_ACCEPTED){
-                client.publish("ctrl/tor/close_ack", "commit");
+                client.publish(mqtt_topic_command_acks, "commit");
             }
         }
     }
@@ -168,17 +188,17 @@ void loop() {
         if(now > last_msg + 1000 || strcmp(hard_pos, prev_hard_pos) != 0){
             last_msg = now;
             strcpy(prev_hard_pos, hard_pos);
-            client.publish("ctrl/tor/current_hard_position", hard_pos);
+            client.publish(mqtt_topic_state, hard_pos);
 
             Serial.print("Hard position = ");
             Serial.println(hard_pos);
         }
 
         if (step.autoclose_state == AUTOCLOSE_PENDING) {
-            client.publish("ctrl/tor/autoclose", "pending");
+            client.publish(mqtt_topic_autoclose, "pending");
         }
         else if (step.autoclose_state == AUTOCLOSE_TRIGGERED) {
-            client.publish("ctrl/tor/autoclose", "triggered");
+            client.publish(mqtt_topic_autoclose, "triggered");
         }
 
         if (step.trigger) {
