@@ -1,6 +1,6 @@
 @startuml statemachine
 
-[*] --> GATE_INIT
+[*] --> GATE_INIT : boot
 
 GATE_INIT    -down-> GATE_CLOSED   : Sensor Down Active
 GATE_INIT    -down-> GATE_OPEN     : Sensor Up Active
@@ -46,14 +46,18 @@ GATE_CLOSE_PREPARE   -up->     GATE_OPEN            : MQTT Commit,\nwrong time o
 GATE_CLOSE_PREPARE   -right->  GATE_CLOSE_TRIGGERED : MQTT Commit,\ncorrect time
 
 GATE_CLOSE_TRIGGERED -up->     GATE_UNKNOWN         : Sensor Up Clear
-GATE_CLOSE_TRIGGERED -right->  GATE_ERROR           : Gate won't move
+GATE_CLOSE_TRIGGERED -down->   GATE_ERROR           : Gate won't move
 GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
 GATE_CLOSE_TRIGGERED: * signal gate moving
 
-GATE_ERROR           -right->  [*]
+GATE_ERROR           -right->  [*] : reset
 GATE_ERROR: hard_state = "error"
-GATE_ERROR: also used when one of
-GATE_ERROR: the other states detects
-GATE_ERROR: a broken sensor
+
+GATE_CLOSED         -down-> GATE_OPEN_TRIGGERED : Autoclose\nButton\npressed
+GATE_OPEN_TRIGGERED -up->   GATE_CLOSED         : Button\nreleased
+GATE_OPEN_TRIGGERED -up->   GATE_UNKNOWN        : Sensor Down Clear
+GATE_OPEN_TRIGGERED -down-> GATE_ERROR          : Gate won't move
+
+any -right-> GATE_ERROR : Sensor reports error
 
 @enduml
