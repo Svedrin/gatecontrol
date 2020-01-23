@@ -18,6 +18,7 @@ StateMachine::StateMachine() {
     this->received_close_at  = 0;
     this->received_commit_at = 0;
     this->autoclose_enabled  = false;
+    this->triggered_at = 0;
 }
 
 step_t StateMachine::step(esp_state_t *esp_state) {
@@ -77,6 +78,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
                 this->autoclose_enabled = true;
                 this->current_state = GATE_OPEN_TRIGGERED;
+                this->triggered_at  = esp_state->millis;
                 next_step.autoclose_state = AUTOCLOSE_ON;
                 next_step.trigger = true;
             }
@@ -129,6 +131,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                 next_step.trigger = true;
                 next_step.autoclose_state = AUTOCLOSE_OFF;
                 this->current_state = GATE_CLOSE_TRIGGERED;
+                this->triggered_at  = esp_state->millis;
                 this->autoclose_enabled = false;
             }
             else {
@@ -141,9 +144,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
             }
-            else if (
-                esp_state->millis > this->received_commit_at + 5000
-            ) {
+            else if (esp_state->millis > this->triggered_at + 5000) {
                 // 5 seconds should more than suffice, something's wrong
                 this->current_state = GATE_ERROR;
             }
@@ -152,6 +153,10 @@ step_t StateMachine::step(esp_state_t *esp_state) {
         case GATE_OPEN_TRIGGERED:
             if (esp_state->sensor_gate_down == SENSOR_CLEAR) {
                 this->current_state = GATE_UNKNOWN;
+            }
+            else if (esp_state->millis > this->triggered_at + 5000) {
+                // 5 seconds should more than suffice, something's wrong
+                this->current_state = GATE_ERROR;
             }
             else if (esp_state->button_autoclose == SENSOR_CLEAR) {
                 this->current_state = GATE_CLOSED;

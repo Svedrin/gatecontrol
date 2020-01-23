@@ -46,6 +46,7 @@ class StateMachine {
         unsigned long received_close_at;
         unsigned long received_commit_at;
         unsigned long autoclose_timer_started_at;
+        unsigned long triggered_at;
         bool autoclose_enabled;
 
     public:
