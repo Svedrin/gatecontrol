@@ -66,6 +66,22 @@ void reconnect() {
 
 void setup(void)
 {
+    // Configure pins
+    pinMode(PIN_MON,        INPUT);
+    pinMode(PIN_UP,         INPUT);
+    pinMode(PIN_DN,         INPUT);
+    pinMode(PIN_AUTOCLOSE,  INPUT_PULLUP);
+    pinMode(PIN_LB_BLOCKED, INPUT_PULLUP);
+    pinMode(PIN_LB_CLEAR,   INPUT_PULLUP);
+
+    pinMode(PIN_ERRORLED,  OUTPUT);
+    pinMode(PIN_STATUSLED, OUTPUT);
+    pinMode(PIN_TRIGGER,   OUTPUT);
+
+    digitalWrite(PIN_ERRORLED,  LOW);
+    digitalWrite(PIN_STATUSLED, LOW);
+    digitalWrite(PIN_TRIGGER,   LOW);
+
     // Start Serial
     Serial.begin(115200);
 
@@ -93,14 +109,6 @@ void setup(void)
     Serial.println(WiFi.localIP());
 
     randomSeed(micros());
-
-    pinMode(PIN_TRIGGER, OUTPUT);
-    digitalWrite(PIN_TRIGGER, LOW);
-
-    pinMode(PIN_UP, INPUT);
-    pinMode(PIN_DN, INPUT);
-    pinMode(PIN_LB_BLOCKED, INPUT_PULLUP);
-    pinMode(PIN_LB_CLEAR,   INPUT_PULLUP);
 
     client.setServer(MQTT_HOST, MQTT_PORT);
     client.setCallback(on_mqtt_message);
