@@ -78,6 +78,10 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
                 this->current_state = GATE_OPEN;
             }
+            else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
+                this->autoclose_enabled_at = esp_state->millis;
+                next_step.autoclose_state = AUTOCLOSE_ON;
+            }
             break;
 
         case GATE_CLOSED:

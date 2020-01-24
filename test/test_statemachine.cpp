@@ -336,6 +336,41 @@ void test_autoclose_normal() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+void test_autoclose_from_unknown() {
+    given_gate_is_down();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_gate_is_moving();
+    when_time_passes(20);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(30);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_we_do_not_trigger();
+
+    given_autoclose_button_is_released();
+    when_time_passes(35);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_we_do_not_trigger();
+
+    given_gate_is_moving();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(50);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+}
+
 void test_autoclose_cancel() {
     given_gate_is_down();
     when_time_passes(10);
