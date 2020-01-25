@@ -396,6 +396,33 @@ void test_remote_close_user_first() {
     then_current_state_is(GATE_CLOSED);
 }
 
+void test_remote_close_blocked() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    when_mqtt_close_command_arrives_at(500);
+    when_time_passes(800);
+    then_current_state_is(GATE_CLOSE_PREPARE);
+    then_we_do_not_trigger();
+
+    // User walks into the light barrier
+    given_light_barrier_is_blocked();
+    when_time_passes(900);
+    then_current_state_is(GATE_BLOCKED);
+
+    // Scotty doesn't know, so he sends his COMMIT
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(1600);
+    then_current_state_is(GATE_BLOCKED);
+    then_we_do_not_trigger();
+
+    given_light_barrier_is_clear();
+    when_time_passes(1700);
+    then_current_state_is(GATE_OPEN);
+}
+
 // COMMIT arrives too early.
 void test_remote_close_early_commit() {
     given_gate_is_up();

@@ -23,6 +23,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_remote_close_when_position_unknown);
     RUN_TEST(test_remote_close_broken_gate);
     RUN_TEST(test_remote_close_user_first);
+    RUN_TEST(test_remote_close_blocked);
     RUN_TEST(test_remote_close_early_commit);
     RUN_TEST(test_remote_close_late_commit);
     RUN_TEST(test_autoclose_normal);
