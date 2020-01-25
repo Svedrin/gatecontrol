@@ -22,7 +22,7 @@ steps:
   - platformio lib install PubSubClient
   - "[ ! -e include/WifiParams.h ] && cp ci/WifiParams.h include/"
   - pio run -e d1_mini
-  - cd docs && LANG=C make | grep -q "up to date"
+  - cd docs && LANG=C make | grep -q "Nothing to be done"
 
 - name: test_nodejs
   image: node:alpine
@@ -39,6 +39,6 @@ steps:
     - test_nodejs
 ---
 kind: signature
-hmac: 5dcea28185c34b09379028253d01ee237da55fd0043f456e5b72b0741680a27d
+hmac: a873bbb6b821043c34e8d11df2802e51ac91c4ed31e65abb093d19c1b428740c
 
 ...

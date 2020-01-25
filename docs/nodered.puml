@@ -1,0 +1,20 @@
+@startuml nodered
+
+[*] --> UNKNOWN
+
+OPEN         -right->   UNKNOWN     : UNKNOWN
+UNKNOWN      -right->   CLOSED      : CLOSED
+
+CLOSED       -left->    UNKNOWN     : UNKNOWN
+UNKNOWN      -left->    OPEN        : OPEN
+
+OPEN         -down->    CLOSE_WARN  : CloseBtn or\nAutoclose Trigered\n→ send CLOSE cmd
+CLOSE_WARN   -right->   CLOSE_TRGR  : COMMIT cmd
+CLOSE_TRGR   -up->      UNKNOWN     : UNKNOWN
+
+OPEN:       Lamp green, then off
+UNKNOWN:    Lamp red
+CLOSED:     Lamp red, then off
+CLOSE_WARN: Lamp blink red 5x,\nthen static
+
+@enduml
