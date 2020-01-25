@@ -343,6 +343,26 @@ void test_remote_close_when_position_unknown() {
     then_we_do_not_trigger();
 }
 
+void test_remote_close_broken_gate() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    when_mqtt_close_command_arrives_at(500);
+    when_time_passes(800);
+    when_mqtt_commit_command_arrives_at(10536);
+    when_time_passes(1600);
+    then_current_state_is(GATE_CLOSE_TRIGGERED);
+    then_we_trigger();
+
+    when_time_passes(1700);
+    then_current_state_is(GATE_CLOSE_TRIGGERED);
+
+    when_time_passes(1800 + GATE_ERROR_TIMEOUT);
+    then_current_state_is(GATE_ERROR);
+}
+
+
+
 /**
  * Chapter three: Autoclose, non-edge cases.
  *
