@@ -13,6 +13,7 @@ int main( int argc, char **argv) {
 
     // StateMachine tests
     RUN_TEST(test_init_open);
+    RUN_TEST(test_init_unknown);
     RUN_TEST(test_init_closed);
     RUN_TEST(test_remote_close_normal);
     RUN_TEST(test_remote_close_light_barrier_blocked);

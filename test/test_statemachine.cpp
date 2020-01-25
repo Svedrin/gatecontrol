@@ -126,6 +126,26 @@ void test_init_open() {
     then_current_state_is(GATE_OPEN);
 }
 
+void test_init_unknown() {
+    given_gate_is_moving();
+    then_current_state_is(GATE_INIT);
+
+    when_time_passes(10);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_up();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
+
+    given_gate_is_moving();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_down();
+    when_time_passes(50);
+    then_current_state_is(GATE_CLOSED);
+}
+
 void test_init_closed() {
     given_gate_is_down();
     then_current_state_is(GATE_INIT);
