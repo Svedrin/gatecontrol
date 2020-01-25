@@ -533,6 +533,32 @@ void test_autoclose_fast_gate() {
     // so not testing again
 }
 
+void test_autoclose_broken_gate() {
+    // Test for when gate won't start moving
+    given_gate_is_down();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(25);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(40 + GATE_ERROR_TIMEOUT);
+    then_current_state_is(GATE_ERROR);
+}
+
 void test_autoclose_from_open() {
     given_gate_is_up();
     given_light_barrier_is_clear();
