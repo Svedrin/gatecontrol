@@ -10,6 +10,7 @@ void test_remote_close_when_position_unknown();
 void test_remote_close_broken_gate();
 void test_remote_close_user_first();
 void test_remote_close_early_commit();
+void test_remote_close_late_commit();
 void test_autoclose_normal();
 void test_autoclose_cancel();
 void test_autoclose_fast_gate();
