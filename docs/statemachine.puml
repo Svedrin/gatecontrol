@@ -25,6 +25,7 @@ GATE_BLOCKED: hard_state = "blocked"
 GATE_BLOCKED    -down->  GATE_CLOSE_AUTO    : Light Barrier Clear\nautoclose is set
 GATE_CLOSE_AUTO -up->    GATE_BLOCKED       : Light\nBarrier\nActive
 GATE_CLOSE_AUTO -up->    GATE_OPEN          : timeout
+GATE_CLOSE_AUTO -down-> __GATE_UNKNOWN      : Sensor Up Clear
 GATE_CLOSE_AUTO : hard_state = "open"
 GATE_CLOSE_AUTO : signal autoclose incoming
 GATE_CLOSE_AUTO : when timeout exceeded:
@@ -43,11 +44,11 @@ GATE_CLOSE_PREPARE: * unset autoclose
 GATE_CLOSE_PREPARE: if not, go to GATE_OPEN
 
 GATE_CLOSE_PREPARE   -up->     GATE_BLOCKED         : Light\nBarrier\nActive
-GATE_CLOSE_PREPARE   -up->     GATE_UNKNOWN         : Sensor Up Clear\nalso needed from\nGATE_CLOSE_AUTO!
+GATE_CLOSE_PREPARE   -up->     GATE_UNKNOWN         : Sensor\nUp Clear
 GATE_CLOSE_PREPARE   -up->     GATE_OPEN            : MQTT Commit,\nwrong time or\ntimeout
 GATE_CLOSE_PREPARE   -right->  GATE_CLOSE_TRIGGERED : MQTT Commit,\ncorrect time
 
-GATE_CLOSE_TRIGGERED -up->     GATE_UNKNOWN         : Sensor Up Clear
+GATE_CLOSE_TRIGGERED -up->     GATE_UNKNOWN         : Sensor\nUp Clear
 GATE_CLOSE_TRIGGERED -down->   GATE_ERROR           : Gate won't move
 GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
 GATE_CLOSE_TRIGGERED: * signal gate moving
@@ -57,7 +58,7 @@ GATE_ERROR: hard_state = "error"
 
 GATE_CLOSED         -down-> GATE_OPEN_TRIGGERED : Autoclose\nButton\npressed
 GATE_OPEN_TRIGGERED -up->   GATE_CLOSED         : Button\nreleased
-GATE_OPEN_TRIGGERED -up->   GATE_UNKNOWN        : Sensor Down Clear
+GATE_OPEN_TRIGGERED -up->   GATE_UNKNOWN        : Sensor\nDown\nClear
 GATE_OPEN_TRIGGERED -down-> GATE_ERROR          : Gate won't move
 GATE_OPEN_TRIGGERED: * exists to make sure\n   we trigger only once
 
