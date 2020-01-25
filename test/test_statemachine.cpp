@@ -1004,5 +1004,87 @@ void test_autoclose_light_barrier_timing() {
     then_we_do_not_trigger();
 }
 
+/**
+ * Chapter five: Unwanted interactions between autoclose and remote-close.
+ *
+ * Let's make sure these two features cannot confuse each other.
+ *
+ * Scenario: One person in the garage wants to use autoclose. Meanwhile
+ * another person in the apartment sees that the gate is open, and unaware
+ * of the pending autoclose, tries to close it remotely.
+ *
+ * In that case we should do what the person in the garage expects, because
+ * if we were to follow the remote-close, they'd be surprised by the gate
+ * closing way earlier than they expected it to. Thus, we reject any remote
+ * commands while autoclose is ongoing.
+ */
+
+void test_autoclose_ignore_mqtt() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    given_autoclose_button_is_released();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // GATE_OPEN has to explicitly catch this situation
+    when_mqtt_close_command_arrives_at(40);
+    then_the_command_is(COMMAND_IGNORED);
+    then_current_state_is(GATE_OPEN);
+
+    when_time_passes(50);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // Now move on to GATE_BLOCKED
+    given_light_barrier_is_blocked();
+    when_time_passes(60);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // GATE_BLOCKED ignores MQTT anyway
+    when_mqtt_close_command_arrives_at(70);
+    then_the_command_is(COMMAND_IGNORED);
+    then_current_state_is(GATE_BLOCKED);
+
+    when_time_passes(80);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // Now move on to GATE_CLOSE_AUTO
+    given_light_barrier_is_clear();
+    when_time_passes(90);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_PENDING);
+
+    when_time_passes(100);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // GATE_CLOSE_AUTO ignores MQTT too
+    when_mqtt_close_command_arrives_at(110);
+    then_the_command_is(COMMAND_IGNORED);
+    then_current_state_is(GATE_CLOSE_AUTO);
+
+    when_time_passes(120);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // Now let's expire the timeout, move back to GATE_OPEN
+    // and see that the Close command is accepted again
+    when_time_passes(90 + AUTOCLOSE_WAIT_PERIOD + 1);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_TRIGGERED);
+
+    when_mqtt_close_command_arrives_at(90 + AUTOCLOSE_WAIT_PERIOD + 10);
+    then_the_command_is(COMMAND_ACCEPTED);
+
+    when_time_passes(90 + AUTOCLOSE_WAIT_PERIOD + 20);
+    then_current_state_is(GATE_CLOSE_PREPARE);
+    then_autoclose_is(AUTOCLOSE_OFF);
+}
 
 #pragma GCC diagnostic pop // Restore compiler settings

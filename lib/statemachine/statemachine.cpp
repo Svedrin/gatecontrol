@@ -199,7 +199,14 @@ step_t StateMachine::step(esp_state_t *esp_state) {
 }
 
 cmd_result_t StateMachine::cmd_close(unsigned long received_at) {
-    if(this->current_state == GATE_OPEN){
+    // Only accept MQTT commands while autoclose is disabled.
+    // This ensures that a person waiting for autoclose to kick in
+    // cannot be surprised by someone else just triggering
+    // the gate remotely via MQTT.
+    if(
+        this->current_state == GATE_OPEN &&
+        this->autoclose_enabled_at == 0
+    ){
         this->received_close_at  = received_at;
         this->received_commit_at = 0;
         this->current_state      = GATE_CLOSE_PREPARE;
