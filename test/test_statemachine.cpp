@@ -1115,4 +1115,43 @@ void test_blocked_ignore_autoclose() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+/**
+ * Chapter six: Error conditions.
+ *
+ * I won't define "given" states for these, because I don't usually
+ * want them to appear.
+ */
+
+void test_gate_both_up_and_down_error() {
+    test_context->input.sensor_gate_up   = SENSOR_ACTIVE;
+    test_context->input.sensor_gate_down = SENSOR_ACTIVE;
+    when_time_passes(10);
+    then_current_state_is(GATE_ERROR);
+}
+
+void test_gate_up_error() {
+    test_context->input.sensor_gate_up   = SENSOR_ERROR;
+    when_time_passes(10);
+    then_current_state_is(GATE_ERROR);
+}
+
+void test_gate_down_error() {
+    test_context->input.sensor_gate_down = SENSOR_ERROR;
+    when_time_passes(10);
+    then_current_state_is(GATE_ERROR);
+}
+
+void test_light_barrier_error() {
+    test_context->input.sensor_light_barrier = SENSOR_ERROR;
+    when_time_passes(10);
+    then_current_state_is(GATE_ERROR);
+}
+
+void test_autoclose_button_error() {
+    test_context->input.button_autoclose = SENSOR_ERROR;
+    when_time_passes(10);
+    then_current_state_is(GATE_ERROR);
+}
+
+
 #pragma GCC diagnostic pop // Restore compiler settings

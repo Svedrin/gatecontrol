@@ -41,6 +41,12 @@ int main( int argc, char **argv) {
     RUN_TEST(test_autoclose_light_barrier_timing);
     RUN_TEST(test_autoclose_ignore_mqtt);
     RUN_TEST(test_blocked_ignore_autoclose);
+    RUN_TEST(test_gate_both_up_and_down_error);
+    RUN_TEST(test_gate_up_error);
+    RUN_TEST(test_gate_down_error);
+    RUN_TEST(test_light_barrier_error);
+    RUN_TEST(test_autoclose_button_error);
+
 
     UNITY_END();
 }

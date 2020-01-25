@@ -25,3 +25,8 @@ void test_autoclose_user_first_then_up();
 void test_autoclose_light_barrier_timing();
 void test_autoclose_ignore_mqtt();
 void test_blocked_ignore_autoclose();
+void test_gate_both_up_and_down_error();
+void test_gate_up_error();
+void test_gate_down_error();
+void test_light_barrier_error();
+void test_autoclose_button_error();
