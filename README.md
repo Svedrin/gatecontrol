@@ -64,6 +64,12 @@ Also note that I'm thinking about re-using the Status LED to also drive a relay 
 
 ![statemachine](docs/statemachine.png)
 
+# NodeRED
+
+For GUI and for controlling the signal light, I use NodeRED. The main part of the setup is [the CPU node](nodered/cpu.js).
+
+![nodered](docs/nodered.png)
+
 # Disclaimer
 
 I broke my gate once during this project, and it's somewhat probable that so will you. I'm obviously not liable for any damages you cause using this project.
