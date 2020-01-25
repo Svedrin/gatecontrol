@@ -7,6 +7,6 @@ When('topic {string} receives a message of {string}', function(topic, payload) {
 
 Then("the signal light is switched to red, then off", function() {
     assert.deepEqual(this.node.last_messages,
-        [null, {payload: this.cmd_light_red}, "not null]
+        [null, {payload: this.cmd_light_red}, "not null"]
     );
 });
