@@ -604,13 +604,17 @@ void test_autoclose_from_closed() {
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_TRIGGERED);
 
+    when_time_passes(15090);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
     when_mqtt_close_command_arrives_at(15210);
     then_the_command_is(COMMAND_ACCEPTED);
 
     when_time_passes(15300);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_OFF);
 
     when_mqtt_commit_command_arrives_at(25236);
     then_the_command_is(COMMAND_ACCEPTED);
@@ -992,6 +996,11 @@ void test_autoclose_light_barrier_timing() {
     when_time_passes(current_trigger_time + 1); // Now
     then_current_state_is(GATE_OPEN);           // hooray
     then_autoclose_is(AUTOCLOSE_TRIGGERED);     // hooray
+    then_we_do_not_trigger();
+
+    when_time_passes(current_trigger_time + 10);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
     then_we_do_not_trigger();
 }
 

@@ -134,6 +134,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if (esp_state->millis > this->autoclose_timer_started_at + AUTOCLOSE_WAIT_PERIOD) {
                 this->current_state = GATE_OPEN;
+                this->autoclose_enabled_at = 0;
                 next_step.autoclose_state = AUTOCLOSE_TRIGGERED;
             }
             break;
@@ -157,10 +158,8 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             ) {
                 // Commit came, and on time
                 next_step.trigger = true;
-                next_step.autoclose_state = AUTOCLOSE_OFF;
                 this->current_state = GATE_CLOSE_TRIGGERED;
                 this->triggered_at  = esp_state->millis;
-                this->autoclose_enabled_at = 0;
             }
             else {
                 // Commit came, but time was off

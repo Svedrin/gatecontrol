@@ -29,7 +29,8 @@ GATE_CLOSE_AUTO -down-> __GATE_UNKNOWN      : Sensor Up Clear
 GATE_CLOSE_AUTO : hard_state = "open"
 GATE_CLOSE_AUTO : signal autoclose incoming
 GATE_CLOSE_AUTO : when timeout exceeded:
-GATE_CLOSE_AUTO : * signal "close me", but
+GATE_CLOSE_AUTO : * signal "close me" and
+GATE_CLOSE_AUTO : * unset autoclose, but
 GATE_CLOSE_AUTO : * do _not_ just start moving\n   because we don't know if\n   the signal is working.\n   require a command for that
 
 GATE_OPEN    -down->  GATE_CLOSE_PREPARE : MQTT\nClose
@@ -38,9 +39,7 @@ GATE_CLOSE_PREPARE: remember time of state entry
 GATE_CLOSE_PREPARE: subsequent Close is rejected
 GATE_CLOSE_PREPARE: if/when commit arrives:
 GATE_CLOSE_PREPARE: check if ~10 seconds elapsed
-GATE_CLOSE_PREPARE: if yes:
-GATE_CLOSE_PREPARE: * trigger motor
-GATE_CLOSE_PREPARE: * unset autoclose
+GATE_CLOSE_PREPARE: if yes, trigger motor
 GATE_CLOSE_PREPARE: if not, go to GATE_OPEN
 
 GATE_CLOSE_PREPARE   -up->     GATE_BLOCKED         : Light\nBarrier\nActive
