@@ -841,7 +841,7 @@ void test_autoclose_broken_gate() {
     then_current_state_is(GATE_ERROR);
 }
 
-void test_autoclose_wait_period_in_gate_open() {
+void test_autoclose_timeout_in_gate_open() {
     // Autoclose starts from GATE_BLOCKED, check it times out
     // correctly when that state is never reached.
     // Enable autoclose while the gate's open (shorter)

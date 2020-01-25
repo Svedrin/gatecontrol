@@ -33,7 +33,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_autoclose_cancel);
     RUN_TEST(test_autoclose_fast_gate);
     RUN_TEST(test_autoclose_broken_gate);
-    RUN_TEST(test_autoclose_wait_period_in_gate_open);
+    RUN_TEST(test_autoclose_timeout_in_gate_open);
     RUN_TEST(test_autoclose_user_first_then_down);
     RUN_TEST(test_autoclose_user_first_then_up);
     RUN_TEST(test_autoclose_light_barrier_timing);
