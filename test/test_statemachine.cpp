@@ -368,6 +368,34 @@ void test_remote_close_broken_gate() {
     then_current_state_is(GATE_ERROR);
 }
 
+// Remote close is ongoing, but still someone just closes the gate manually.
+void test_remote_close_user_first() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    when_mqtt_close_command_arrives_at(500);
+    when_time_passes(800);
+    then_current_state_is(GATE_CLOSE_PREPARE);
+    then_we_do_not_trigger();
+
+    // User pushes da button
+    given_gate_is_moving();
+    when_time_passes(900);
+    then_current_state_is(GATE_UNKNOWN);
+
+    // Scotty doesn't know, so he sends his COMMIT
+    when_mqtt_commit_command_arrives_at(10536);
+    then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(1600);
+    then_current_state_is(GATE_UNKNOWN);
+    then_we_do_not_trigger();
+
+    given_gate_is_down();
+    when_time_passes(1700);
+    then_current_state_is(GATE_CLOSED);
+}
+
 
 
 /**

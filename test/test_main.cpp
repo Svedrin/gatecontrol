@@ -22,6 +22,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_remote_close_when_already_closed);
     RUN_TEST(test_remote_close_when_position_unknown);
     RUN_TEST(test_remote_close_broken_gate);
+    RUN_TEST(test_remote_close_user_first);
     RUN_TEST(test_autoclose_normal);
     RUN_TEST(test_autoclose_cancel);
     RUN_TEST(test_autoclose_fast_gate);
