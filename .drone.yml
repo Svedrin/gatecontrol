@@ -27,8 +27,9 @@ steps:
 - name: test_nodejs
   image: node:alpine
   commands:
-  - cd nodered && yarn add -D chai@latest cucumber@latest
-  - cd nodered && NODE_PATH=. ./node_modules/cucumber/bin/cucumber-js
+  - cd nodered
+  - yarn add -D chai@latest cucumber@latest
+  - NODE_PATH=. ./node_modules/cucumber/bin/cucumber-js
 
 - name: wait
   image: python:alpine
@@ -38,6 +39,6 @@ steps:
     - test_nodejs
 ---
 kind: signature
-hmac: fdde50babcf043bf51afe40bd7d7f543cb2386610e367bbe3d03a32577dadcdc
+hmac: 5dcea28185c34b09379028253d01ee237da55fd0043f456e5b72b0741680a27d
 
 ...
