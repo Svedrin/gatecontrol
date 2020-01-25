@@ -2,19 +2,23 @@
 
 [*] --> UNKNOWN
 
+BLOCKED      -right->   OPEN        : OPEN\nAutoclose Pending
 OPEN         -right->   UNKNOWN     : UNKNOWN
 UNKNOWN      -right->   CLOSED      : CLOSED
 
 CLOSED       -left->    UNKNOWN     : UNKNOWN
 UNKNOWN      -left->    OPEN        : OPEN
+OPEN         -left->    BLOCKED     : BLOCKED
 
-OPEN         -down->    CLOSE_WARN  : CloseBtn or\nAutoclose Trigered\n→ send CLOSE cmd
-CLOSE_WARN   -right->   CLOSE_TRGR  : COMMIT cmd
+OPEN         -down->    CLOSE_WARN  : CloseBtn or\nAutoclose Triggered\n→ send CLOSE cmd
+CLOSE_WARN   -right->   CLOSE_TRGR  : COMMIT cmd accepted
+CLOSE_WARN   -up->      OPEN        : COMMIT cmd\nrejected
 CLOSE_TRGR   -up->      UNKNOWN     : UNKNOWN
 
-OPEN:       Lamp green, then off
+BLOCKED:    Lamp yellow
+OPEN:       Autoclose off: Lamp green, then off\nAutoclose on:  Lamp blue
 UNKNOWN:    Lamp red
 CLOSED:     Lamp red, then off
-CLOSE_WARN: Lamp blink red 5x,\nthen static
+CLOSE_WARN: Lamp blink red 5x,\nthen static red
 
 @enduml
