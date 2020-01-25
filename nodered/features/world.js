@@ -3,11 +3,11 @@ const { step } = require("cpu");
 
 const Node = {
     vars: {
-        status: null,
+        last_status: null,
         last_messages: null
     },
     status(status) {
-        this.status = status;
+        this.last_status = status;
     },
     send(msgs) {
         this.last_messages = msgs;
