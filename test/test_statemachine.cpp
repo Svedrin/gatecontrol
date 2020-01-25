@@ -964,7 +964,7 @@ void test_autoclose_light_barrier_timing() {
     given_light_barrier_is_blocked();
     when_time_passes(200 + AUTOCLOSE_TIMEOUT - 50);
     then_current_state_is(GATE_BLOCKED);
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_RESET);
     then_we_do_not_trigger();
 
     given_light_barrier_is_clear();

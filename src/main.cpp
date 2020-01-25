@@ -216,6 +216,9 @@ void loop() {
         if (step.autoclose_state == AUTOCLOSE_PENDING) {
             client.publish(mqtt_topic_autoclose, "pending");
         }
+        else if (step.autoclose_state == AUTOCLOSE_RESET) {
+            client.publish(mqtt_topic_autoclose, "reset");
+        }
         else if (step.autoclose_state == AUTOCLOSE_TRIGGERED) {
             client.publish(mqtt_topic_autoclose, "triggered");
         }

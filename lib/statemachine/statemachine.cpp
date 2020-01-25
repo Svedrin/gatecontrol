@@ -18,6 +18,7 @@ StateMachine::StateMachine() {
     this->received_close_at  = 0;
     this->received_commit_at = 0;
     this->autoclose_enabled_at = 0;
+    this->autoclose_timer_started_at = 0;
     this->triggered_at = 0;
 }
 
@@ -123,6 +124,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
         case GATE_CLOSE_AUTO:
             if( esp_state->sensor_light_barrier == SENSOR_ACTIVE ){
                 this->current_state = GATE_BLOCKED;
+                next_step.autoclose_state = AUTOCLOSE_RESET;
             }
             else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
