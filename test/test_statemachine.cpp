@@ -967,9 +967,9 @@ void test_autoclose_light_barrier_timing() {
 
     // So looks like the timeout really does expire at 500+AC_W_P.
     // Let's block the light barrier 50ms prior to that, and unblock it
-    // in time for the timeout to expire, so that we don't prevent the
-    // gate from moving by being in the wrong state. If the timers are
-    // implemented correctly, the gate must not start moving.
+    // in time for the timeout to expire, so that that it's not us being
+    // in the wrong state that prevents the gate from moving. If the
+    // timers are implemented correctly, the gate must stay put.
 
     given_light_barrier_is_blocked();
     when_time_passes(current_trigger_time - 50);
