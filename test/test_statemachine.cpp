@@ -299,6 +299,13 @@ void test_remote_close_light_barrier_blocked() {
     then_we_do_not_trigger();
 }
 
+/**
+ * Chapter three: Remote close, edge cases.
+ *
+ * Let's make sure that when weird stuff happens, we do NOT react
+ * in a dangerous manner.
+ */
+
 // When the gate is closed, we must not trigger (and thereby open it)
 void test_remote_close_when_already_closed() {
     given_gate_is_down();
@@ -364,7 +371,7 @@ void test_remote_close_broken_gate() {
 
 
 /**
- * Chapter three: Autoclose, non-edge cases.
+ * Chapter four: Autoclose, non-edge cases.
  *
  * This operation is basically an extension of chapter two.
  */
@@ -477,6 +484,13 @@ void test_autoclose_from_unknown() {
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 }
+
+/**
+ * Chapter five: Autoclose, edge cases.
+ *
+ * Same intention as chapter three: Weird stuff going on, make sure
+ * we don't make it worse.
+ */
 
 void test_autoclose_cancel() {
     given_gate_is_down();
