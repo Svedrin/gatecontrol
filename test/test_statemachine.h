@@ -20,3 +20,5 @@ void test_autoclose_cancel();
 void test_autoclose_fast_gate();
 void test_autoclose_broken_gate();
 void test_autoclose_timeout_in_gate_open();
+void test_autoclose_user_first_then_down();
+void test_autoclose_user_first_then_up();

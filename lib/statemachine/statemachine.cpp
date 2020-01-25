@@ -126,6 +126,9 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
                 this->current_state = GATE_UNKNOWN;
+                // Let's take this as a sign they changed their mind about autoclose
+                this->autoclose_enabled_at = 0;
+                next_step.autoclose_state = AUTOCLOSE_OFF;
             }
             else if (esp_state->millis > this->autoclose_timer_started_at + AUTOCLOSE_WAIT_PERIOD) {
                 this->current_state = GATE_OPEN;

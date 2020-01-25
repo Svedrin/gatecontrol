@@ -868,4 +868,67 @@ void test_autoclose_timeout_in_gate_open() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+void test_autoclose_user_first_then_down() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    given_autoclose_button_is_released();
+    when_time_passes(30);
+    then_autoclose_is(AUTOCLOSE_ON);
+    given_light_barrier_is_blocked();
+    when_time_passes(40);
+    given_light_barrier_is_clear();
+    when_time_passes(50);
+    then_current_state_is(GATE_CLOSE_AUTO);
+
+    // Now the user presses the gate engine remote to
+    // close the gate
+    given_gate_is_moving();
+    when_time_passes(60);
+    then_current_state_is(GATE_UNKNOWN);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_gate_is_down();
+    when_time_passes(70);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+}
+
+void test_autoclose_user_first_then_up() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    given_autoclose_button_is_released();
+    when_time_passes(30);
+    then_autoclose_is(AUTOCLOSE_ON);
+    given_light_barrier_is_blocked();
+    when_time_passes(40);
+    given_light_barrier_is_clear();
+    when_time_passes(50);
+    then_current_state_is(GATE_CLOSE_AUTO);
+
+    // Now the user presses the gate engine remote to
+    // close the gate
+    given_gate_is_moving();
+    when_time_passes(60);
+    then_current_state_is(GATE_UNKNOWN);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    // Now they change their mind and move the gate back up
+    given_gate_is_up();
+    when_time_passes(70);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    when_time_passes(80);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+}
+
 #pragma GCC diagnostic pop // Restore compiler settings
