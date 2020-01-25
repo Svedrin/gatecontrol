@@ -7,25 +7,39 @@
 
 #include "monitoredsensor.h"
 
-MonitoredSensor::MonitoredSensor(int pin_active, int pin_monitor, int when_active) {
-    this->pin_active   = pin_active;
-    this->pin_monitor  = pin_monitor;
-    this->when_active  = when_active;
+MonitoredSensor::MonitoredSensor(int pin_active, int pin_monitor, int when_active, bool both_is_error) {
+    this->pin_active    = pin_active;
+    this->pin_monitor   = pin_monitor;
+    this->when_active   = when_active;
+    this->both_is_error = both_is_error;
     this->last_valid_state = SENSOR_INIT;
-    this->error_since  = 0;
+    this->error_since   = 0;
 }
 
 sensor_state_t MonitoredSensor::read(unsigned long millis) {
-    if (this->digital_read(this->pin_active) == this->when_active) {
-        // Valid state, active pin is signalling
+    if (
+        this->digital_read(this->pin_active) == this->when_active &&
+        (
+            !this->both_is_error ||
+            this->digital_read(this->pin_monitor) != this->when_active
+        )
+    ) {
+        // Valid state, active pin is signalling and monitor pin either
+        // doesn't matter or is NOT signalling
         this->last_valid_state = SENSOR_ACTIVE;
         this->error_since = 0;
         return SENSOR_ACTIVE;
-    } else if (this->digital_read(this->pin_monitor) == this->when_active) {
+    } else if (
+        this->digital_read(this->pin_active)  != this->when_active &&
+        this->digital_read(this->pin_monitor) == this->when_active
+    ) {
         // Valid state, active pin is not signalling but monitor pin _is_
         this->last_valid_state = SENSOR_CLEAR;
         this->error_since = 0;
         return SENSOR_CLEAR;
+    } else if (this->last_valid_state == SENSOR_INIT) {
+        // Sensor never gave a valid reading
+        return SENSOR_ERROR;
     } else if (this->error_since == 0) {
         // Both are gone. let's debounce this for 50ms
         this->error_since = millis;

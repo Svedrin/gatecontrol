@@ -9,6 +9,7 @@ class MonitoredSensor {
         int pin_active;
         int pin_monitor;
         int when_active;     // Is the sensor active when the pin is LOW or when its HIGH?
+        bool both_is_error;  // Is it an error when both pin_active and pin_monitor read active at the same time?
 
         sensor_state_t last_valid_state;
         unsigned long error_since;
@@ -16,7 +17,7 @@ class MonitoredSensor {
         virtual int digital_read(int pin);
 
     public:
-        MonitoredSensor(int pin_active, int pin_monitor, int when_active);
+        MonitoredSensor(int pin_active, int pin_monitor, int when_active, bool both_is_error);
         sensor_state_t read(unsigned long millis);
 };
 

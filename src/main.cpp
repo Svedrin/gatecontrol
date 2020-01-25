@@ -24,7 +24,7 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 StateMachine state_machine;
-MonitoredSensor light_barrier(PIN_LB_BLOCKED, PIN_LB_CLEAR, LOW);
+MonitoredSensor light_barrier(PIN_LB_BLOCKED, PIN_LB_CLEAR, LOW, true);
 
 unsigned long last_tick;
 unsigned long last_msg;

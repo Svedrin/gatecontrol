@@ -10,6 +10,8 @@ int main( int argc, char **argv) {
 
     // MonitoredSensor tests
     RUN_TEST(test_monitoredsensor);
+    RUN_TEST(test_both_is_error);
+    RUN_TEST(test_error_on_first_reading);
 
     // StateMachine tests
     RUN_TEST(test_init_open);
