@@ -841,24 +841,21 @@ void test_autoclose_broken_gate() {
     then_current_state_is(GATE_ERROR);
 }
 
-void test_autoclose_timeout() {
+void test_autoclose_timeout_in_gate_open() {
+    // Autoclose starts from GATE_BLOCKED, check it times out
+    // correctly when that state is never reached.
     // Enable autoclose while the gate's open (shorter)
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    then_current_state_is(GATE_OPEN);
-    then_autoclose_is(AUTOCLOSE_OFF);
-
     given_autoclose_button_is_pressed();
     when_time_passes(20);
-    then_current_state_is(GATE_OPEN);
-    then_we_do_not_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
-
     given_autoclose_button_is_released();
     when_time_passes(30);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
+
+    // Now we just sit idle for a while
 
     when_time_passes(50 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);

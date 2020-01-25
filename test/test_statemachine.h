@@ -19,4 +19,4 @@ void test_autoclose_from_open();
 void test_autoclose_cancel();
 void test_autoclose_fast_gate();
 void test_autoclose_broken_gate();
-void test_autoclose_timeout();
+void test_autoclose_timeout_in_gate_open();
