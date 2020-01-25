@@ -29,32 +29,52 @@ When('the gate is blocked', function() {
     });
 });
 
+When('autoclose is pending', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/autoclose",
+        payload: "pending"
+    });
+});
+
+When('autoclose has triggered', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/autoclose",
+        payload: "triggered"
+    });
+});
+
 Then("the signal light is switched to red, then off", function() {
-    assert.deepEqual(this.node.last_messages,
+    assert.deepEqual(this.node.last_messages.shift(),
         [null, {payload: this.cmd_light_red}, null]
     );
 });
 
 Then("the signal light is switched to red permanently", function() {
-    assert.deepEqual(this.node.last_messages,
+    assert.deepEqual(this.node.last_messages.shift(),
         [{payload: this.cmd_light_red}, {reset: true}, null]
     );
 });
 
 Then("the signal light is switched to yellow permanently", function() {
-    assert.deepEqual(this.node.last_messages,
+    assert.deepEqual(this.node.last_messages.shift(),
         [{payload: this.cmd_light_yellow}, {reset: true}, null]
     );
 });
 
 Then("the signal light is switched to green, then off", function() {
-    assert.deepEqual(this.node.last_messages,
+    assert.deepEqual(this.node.last_messages.shift(),
         [null, {payload: this.cmd_light_green}, null]
     );
 });
 
+Then("the signal light is switched to blue permanently", function() {
+    assert.deepEqual(this.node.last_messages.shift(),
+        [{payload: this.cmd_light_blue}, {reset: true}, null]
+    );
+});
+
 Then("the node status is {string} and says {string}", function(color, text) {
-    assert.deepEqual(this.node.last_status,
+    assert.deepEqual(this.node.last_status.shift(),
         {fill: color, shape: "dot", text: text}
     );
 });

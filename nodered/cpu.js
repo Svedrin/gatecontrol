@@ -17,47 +17,50 @@ var status_unknown   = { fill: "yellow", shape: "dot", text: "unknown" };
 var status_closed    = { fill: "green",  shape: "dot", text: "closed"  };
 var status_blocked   = { fill: "yellow", shape: "dot", text: "blocked" };
 
+var node_status;
 switch(context.get("state") || "UNKNOWN"){
     case "UNKNOWN":
-        node.status(status_unknown);
+        node_status = status_unknown;
         if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
             if(msg.payload == "CLOSED"){
-                node.status(status_closed);
+                node_status = status_closed;
                 node.send([null, {payload: cmd_light_red}, null]);
                 context.set("state", "CLOSED");
             }
             else if(msg.payload == "OPEN"){
-                node.status(status_open);
+                node_status = status_open;
                 node.send([null, {payload: cmd_light_green}, null]);
                 context.set("state", "OPEN");
             }
         }
+        node.status(node_status);
         break;
 
     case "CLOSED":
-        node.status(status_closed);
+        node_status = status_closed;
         if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
             if(msg.payload == "UNKNOWN"){
-                node.status(status_unknown);
+                node_status = status_unknown;
                 node.send([{payload: cmd_light_red}, {reset: true}, null]);
                 context.set("state", "UNKNOWN");
             }
         } else if(msg.topic == "lifx/ampel" && msg.event == "update"){
             node.send([null, {payload: cmd_light_red}, null]);
         }
+        node.status(node_status);
         break;
 
     case "OPEN":
-        node.status(status_open);
+        node_status = status_open;
         if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
             switch(msg.payload) {
                 case "UNKNOWN":
-                    node.status(status_unknown);
+                    node_status = status_unknown;
                     node.send([{payload: cmd_light_red}, {reset: true}, null]);
                     context.set("state", "UNKNOWN");
                     break;
                 case "BLOCKED":
-                    node.status(status_blocked);
+                    node_status = status_blocked;
                     node.send([{payload: cmd_light_yellow}, {reset: true}, null]);
                     context.set("state", "BLOCKED");
                     break;
@@ -105,10 +108,10 @@ switch(context.get("state") || "UNKNOWN"){
         } else if(msg.topic == "lifx/ampel" && msg.event == "update"){
             node.send([null, {payload: cmd_light_green}, null]);
         }
+        node.status(node_status);
         break;
 
     case "BLOCKED":
-        node.send([{payload: cmd_light_yellow}, {reset: true}, null]);
         if(
             msg.topic == "ctrl/" + tor_esp + "/current_hard_position" &&
             msg.payload == "OPEN"
@@ -116,6 +119,9 @@ switch(context.get("state") || "UNKNOWN"){
             node.status(status_open);
             node.send([null, {payload: cmd_light_green}, null]);
             context.set("state", "OPEN");
+        }
+        else {
+            node.send([{payload: cmd_light_yellow}, {reset: true}, null]);
         }
         break;
 }

@@ -20,3 +20,15 @@ Feature: NodeRED
     When the gate is open
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
+
+  Scenario: Autoclose pending
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+
+    When autoclose has triggered
+    Then the signal light is switched to red permanently
+    And the node status is "red" and says "open"
