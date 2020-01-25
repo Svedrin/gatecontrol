@@ -995,11 +995,10 @@ void test_autoclose_light_barrier_timing() {
     // The time where it now _is_ supposed to happen, is one
     // AUTOCLOSE_WAIT_PERIOD after the last time where the light barrier
     // became clear, which happened at 500 + AUTOCLOSE_WAIT_PERIOD - 30:
-    current_trigger_time = (500 + AUTOCLOSE_WAIT_PERIOD - 30) + AUTOCLOSE_WAIT_PERIOD;
+    current_trigger_time = current_trigger_time - 30 + AUTOCLOSE_WAIT_PERIOD;
 
-    // Let's interrupt this once more, block the light barrier during
-    // that period, and make sure the state changes are still handled
-    // correctly.
+    // Let's interrupt this once more by blocking the light barrier during
+    // that period, and make sure the state changes are still correct.
 
     given_light_barrier_is_blocked();
     when_time_passes(current_trigger_time - 50);
@@ -1023,14 +1022,14 @@ void test_autoclose_light_barrier_timing() {
     current_trigger_time = current_trigger_time + 50 + AUTOCLOSE_WAIT_PERIOD;
 
     // Check that it does happen then.
-    when_time_passes(current_trigger_time - 1);
-    then_current_state_is(GATE_CLOSE_AUTO);
-    then_autoclose_is(AUTOCLOSE_ON);
+    when_time_passes(current_trigger_time - 1); // Not yet
+    then_current_state_is(GATE_CLOSE_AUTO);     // as opposed to GATE_OPEN
+    then_autoclose_is(AUTOCLOSE_ON);            // as opposed to _TRIGGERED
     then_we_do_not_trigger();
 
-    when_time_passes(current_trigger_time + 1);
-    then_current_state_is(GATE_OPEN);
-    then_autoclose_is(AUTOCLOSE_TRIGGERED);
+    when_time_passes(current_trigger_time + 1); // Now
+    then_current_state_is(GATE_OPEN);           // hooray
+    then_autoclose_is(AUTOCLOSE_TRIGGERED);     // hooray
     then_we_do_not_trigger();
 }
 
