@@ -3,7 +3,7 @@ kind: pipeline
 name: default
 
 steps:
-- name: test
+- name: test_esp
   image: python:alpine
   commands:
   - apk add --no-cache g++
@@ -24,13 +24,20 @@ steps:
   - pio run -e d1_mini
   - cd docs && LANG=C make | grep -q "up to date"
 
+- name: test_nodejs
+  image: node:alpine
+  commands:
+  - cd nodejs && yarn add -D chai@latest cucumber@latest
+  - nodecd nodejs && NODE_PATH=. ./node_modules/cucumber/bin/cucumber-js
+
 - name: wait
   image: python:alpine
   depends_on:
-    - test
+    - test_esp
     - build
+    - test_nodejs
 ---
 kind: signature
-hmac: 904b698ea340f2b27bf6545a79a1332d23e9db789f06e3eab4703346141c1dbf
+hmac: 88c8118b217c650c71f9cac2e0f57fea4459a2ca80c29f193189f325661dafae
 
 ...
