@@ -580,13 +580,13 @@ void test_autoclose_timeout() {
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
-    when_time_passes(60050);
+    when_time_passes(50 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 
     // The state above got reported by the code that ran
     // the state change; check that it also persisted it
-    when_time_passes(60060);
+    when_time_passes(60 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
