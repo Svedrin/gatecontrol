@@ -18,13 +18,13 @@ int main( int argc, char **argv) {
     RUN_TEST(test_open_blocked_then_up);
     RUN_TEST(test_open_blocked_then_down);
     RUN_TEST(test_remote_close_normal);
-    RUN_TEST(test_remote_close_light_barrier_blocked);
+    RUN_TEST(test_remote_close_light_barrier_blocked_always);
     RUN_TEST(test_remote_close_when_already_closed);
     RUN_TEST(test_remote_close_when_position_unknown);
     RUN_TEST(test_remote_close_broken_gate);
     RUN_TEST(test_remote_close_user_first);
-    RUN_TEST(test_remote_close_blocked);
-    RUN_TEST(test_remote_close_blocked_shortly);
+    RUN_TEST(test_remote_close_blocked_during_commit);
+    RUN_TEST(test_remote_close_blocked_before_commit);
     RUN_TEST(test_remote_close_early_commit);
     RUN_TEST(test_remote_close_late_commit);
     RUN_TEST(test_autoclose_normal);

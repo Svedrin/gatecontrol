@@ -276,7 +276,7 @@ void test_remote_close_normal() {
 }
 
 // When the light barrier is blocked, we must not trigger.
-void test_remote_close_light_barrier_blocked() {
+void test_remote_close_light_barrier_blocked_always() {
     given_gate_is_up();
     given_light_barrier_is_blocked();
     when_time_passes(100);
@@ -396,7 +396,7 @@ void test_remote_close_user_first() {
     then_current_state_is(GATE_CLOSED);
 }
 
-void test_remote_close_blocked() {
+void test_remote_close_blocked_during_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
@@ -423,7 +423,7 @@ void test_remote_close_blocked() {
     then_current_state_is(GATE_OPEN);
 }
 
-void test_remote_close_blocked_shortly() {
+void test_remote_close_blocked_before_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
