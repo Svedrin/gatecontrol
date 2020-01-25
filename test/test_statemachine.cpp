@@ -931,4 +931,73 @@ void test_autoclose_user_first_then_up() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+// Make sure that when the light barrier triggers a few times before
+// our autoclose timer expires, we still do the right thing
+void test_autoclose_light_barrier_timing() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(100);
+    given_autoclose_button_is_pressed();
+    when_time_passes(200);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_current_state_is(GATE_OPEN);
+    given_autoclose_button_is_released();
+    when_time_passes(300);
+
+    // block once to go to GATE_CLOSE_AUTO
+    given_light_barrier_is_blocked();
+    when_time_passes(400);
+    given_light_barrier_is_clear();
+    when_time_passes(500);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_PENDING);
+
+    // The timeout shall now expire at 500+AUTOCLOSE_TIMEOUT.
+    // Autoclose was initially enabled at 200, which means that if the
+    // state machine erroneously uses the "enabled_at" time, it would
+    // trigger autoclose at 200+AUTOCLOSE_TIMEOUT instead of 500+AC_T.
+    // Let's block the light barrier 50ms prior to that, and unblock it
+    // in time for the timeout to expire, so that we don't prevent the
+    // gate from moving by being in the wrong state. If the timers are
+    // implemented correctly, the gate must not start moving.
+
+    given_light_barrier_is_blocked();
+    when_time_passes(200 + AUTOCLOSE_TIMEOUT - 50);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_we_do_not_trigger();
+
+    given_light_barrier_is_clear();
+    when_time_passes(200 + AUTOCLOSE_TIMEOUT - 30);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_PENDING);
+    then_we_do_not_trigger();
+
+    // Now we expire the timeout and see what happens. (Ideally, nothing.)
+    when_time_passes(200 + AUTOCLOSE_TIMEOUT + 30);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_we_do_not_trigger();
+
+    // The blocking operation above also invalidates the initial timeout,
+    // meaning that while we initially intended to close at
+    // 500+AUTOCLOSE_TIMEOUT, that is no longer supposed to happen.
+    // Check that it doesn't.
+
+    when_time_passes(500 + AUTOCLOSE_TIMEOUT + 30);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_ON);
+    then_we_do_not_trigger();
+
+    // The time where it now _is_ supposed to happen, is
+    // (200 + AUTOCLOSE_TIMEOUT + 30) + AUTOCLOSE_TIMEOUT.
+    // Check that it does happen then.
+
+    when_time_passes(200 + AUTOCLOSE_TIMEOUT + 30 + AUTOCLOSE_TIMEOUT + 1);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_TRIGGERED);
+    then_we_do_not_trigger();
+}
+
+
 #pragma GCC diagnostic pop // Restore compiler settings
