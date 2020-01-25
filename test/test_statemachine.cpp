@@ -1087,4 +1087,32 @@ void test_autoclose_ignore_mqtt() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+void test_blocked_ignore_autoclose() {
+    // Check that GATE_BLOCKED cannot enable autoclose.
+    // This is important because it can be reached by
+    // interrupting an ongoing remote-close, so let's
+    // make sure we keep things sane.
+    given_gate_is_up();
+    given_light_barrier_is_blocked();
+    when_time_passes(100);
+    then_current_state_is(GATE_OPEN);
+    when_time_passes(200);
+    then_current_state_is(GATE_BLOCKED);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(300);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_released();
+    when_time_passes(400);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_light_barrier_is_clear();
+    when_time_passes(500);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_OFF);
+}
+
 #pragma GCC diagnostic pop // Restore compiler settings

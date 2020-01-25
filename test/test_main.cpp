@@ -38,6 +38,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_autoclose_user_first_then_up);
     RUN_TEST(test_autoclose_light_barrier_timing);
     RUN_TEST(test_autoclose_ignore_mqtt);
+    RUN_TEST(test_blocked_ignore_autoclose);
 
     UNITY_END();
 }
