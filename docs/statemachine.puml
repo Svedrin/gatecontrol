@@ -34,6 +34,7 @@ GATE_CLOSE_AUTO : * unset autoclose, but
 GATE_CLOSE_AUTO : * do _not_ just start moving\n   because we don't know if\n   the signal is working.\n   require a command for that
 
 GATE_OPEN    -down->  GATE_CLOSE_PREPARE : MQTT\nClose
+GATE_CLOSE_PREPARE: hard_state = "open"
 GATE_CLOSE_PREPARE: signal intent to close
 GATE_CLOSE_PREPARE: remember time of state entry
 GATE_CLOSE_PREPARE: subsequent Close is rejected
@@ -49,6 +50,7 @@ GATE_CLOSE_PREPARE   -right->  GATE_CLOSE_TRIGGERED : MQTT Commit,\ncorrect time
 
 GATE_CLOSE_TRIGGERED -up->     GATE_UNKNOWN         : Sensor\nUp Clear
 GATE_CLOSE_TRIGGERED -down->   GATE_ERROR           : Gate won't move
+GATE_CLOSE_TRIGGERED: hard_state = "open"
 GATE_CLOSE_TRIGGERED: * exists to make sure\n   we trigger only once
 GATE_CLOSE_TRIGGERED: * signal gate moving
 
@@ -59,6 +61,7 @@ GATE_CLOSED         -down-> GATE_OPEN_TRIGGERED : Autoclose\nButton\npressed
 GATE_OPEN_TRIGGERED -up->   GATE_CLOSED         : Button\nreleased
 GATE_OPEN_TRIGGERED -up->   GATE_UNKNOWN        : Sensor\nDown\nClear
 GATE_OPEN_TRIGGERED -down-> GATE_ERROR          : Gate won't move
+GATE_OPEN_TRIGGERED: hard_state = "closed"
 GATE_OPEN_TRIGGERED: * exists to make sure\n   we trigger only once
 
 any -right-> GATE_ERROR : Sensor reports error
