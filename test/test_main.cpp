@@ -15,6 +15,8 @@ int main( int argc, char **argv) {
     RUN_TEST(test_init_open);
     RUN_TEST(test_init_unknown);
     RUN_TEST(test_init_closed);
+    RUN_TEST(test_open_blocked_then_up);
+    RUN_TEST(test_open_blocked_then_down);
     RUN_TEST(test_remote_close_normal);
     RUN_TEST(test_remote_close_light_barrier_blocked);
     RUN_TEST(test_remote_close_when_already_closed);

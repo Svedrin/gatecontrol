@@ -115,6 +115,9 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                     this->current_state = GATE_OPEN;
                 }
             }
+            else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
+                this->current_state = GATE_UNKNOWN;
+            }
             break;
 
         case GATE_CLOSE_AUTO:

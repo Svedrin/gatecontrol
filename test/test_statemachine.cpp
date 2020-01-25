@@ -170,6 +170,73 @@ void test_init_closed() {
     then_current_state_is(GATE_CLOSED);
 }
 
+void test_open_blocked_then_up() {
+    given_gate_is_up();
+    when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
+
+    given_light_barrier_is_blocked();
+    when_time_passes(20);
+    then_current_state_is(GATE_BLOCKED);
+
+    given_light_barrier_is_clear();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
+
+    given_light_barrier_is_blocked();
+    when_time_passes(40);
+    then_current_state_is(GATE_BLOCKED);
+
+    given_gate_is_moving();
+    when_time_passes(50);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_light_barrier_is_clear();
+    when_time_passes(60);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_up();
+    when_time_passes(70);
+    then_current_state_is(GATE_OPEN);
+
+    when_time_passes(80);
+    then_current_state_is(GATE_OPEN);
+}
+
+void test_open_blocked_then_down() {
+    given_gate_is_up();
+    when_time_passes(10);
+    then_current_state_is(GATE_OPEN);
+
+    given_light_barrier_is_blocked();
+    when_time_passes(20);
+    then_current_state_is(GATE_BLOCKED);
+
+    given_light_barrier_is_clear();
+    when_time_passes(30);
+    then_current_state_is(GATE_OPEN);
+
+    given_light_barrier_is_blocked();
+    when_time_passes(40);
+    then_current_state_is(GATE_BLOCKED);
+
+    given_gate_is_moving();
+    when_time_passes(50);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_light_barrier_is_clear();
+    when_time_passes(60);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_down();
+    when_time_passes(70);
+    then_current_state_is(GATE_CLOSED);
+
+    when_time_passes(80);
+    then_current_state_is(GATE_CLOSED);
+}
+
+
 /**
  * Chapter two: Remote close, non-edge cases.
  *
