@@ -495,6 +495,44 @@ void test_autoclose_cancel() {
     then_autoclose_is(AUTOCLOSE_OFF);
 }
 
+void test_autoclose_fast_gate() {
+    // Test for when gate starts moving before the button is released.
+    given_gate_is_down();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(25);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_moving();
+    when_time_passes(30);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_autoclose_button_is_released();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(50);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    // From here on out, everything works just as in _normal,
+    // so not testing again
+}
+
 void test_autoclose_from_open() {
     given_gate_is_up();
     given_light_barrier_is_clear();
