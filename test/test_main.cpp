@@ -27,12 +27,12 @@ int main( int argc, char **argv) {
     RUN_TEST(test_remote_close_blocked_before_commit);
     RUN_TEST(test_remote_close_early_commit);
     RUN_TEST(test_remote_close_late_commit);
-    RUN_TEST(test_autoclose_normal);
+    RUN_TEST(test_autoclose_from_closed);
+    RUN_TEST(test_autoclose_from_unknown);
+    RUN_TEST(test_autoclose_from_open);
     RUN_TEST(test_autoclose_cancel);
     RUN_TEST(test_autoclose_fast_gate);
     RUN_TEST(test_autoclose_broken_gate);
-    RUN_TEST(test_autoclose_from_open);
-    RUN_TEST(test_autoclose_from_unknown);
     RUN_TEST(test_autoclose_timeout);
 
     UNITY_END();
