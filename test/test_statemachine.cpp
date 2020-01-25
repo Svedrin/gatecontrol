@@ -396,7 +396,53 @@ void test_remote_close_user_first() {
     then_current_state_is(GATE_CLOSED);
 }
 
+// COMMIT arrives too early.
+void test_remote_close_early_commit() {
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(10);
+    when_mqtt_close_command_arrives_at(500);
+    when_time_passes(800);
+    then_current_state_is(GATE_CLOSE_PREPARE);
+    then_we_do_not_trigger();
 
+    // Test a broken flow first: Commit arrives 5s too early
+    when_mqtt_commit_command_arrives_at(5536);
+    // TODO then_the_command_is(COMMAND_IGNORED);
+
+    when_time_passes(5600);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
+
+    when_time_passes(10536);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
+
+    when_time_passes(15536);
+    then_current_state_is(GATE_OPEN);
+    then_we_do_not_trigger();
+
+    // Now test a normal flow again to see that it still works
+    when_mqtt_close_command_arrives_at(20500);
+    when_time_passes(20800);
+    then_current_state_is(GATE_CLOSE_PREPARE);
+    then_we_do_not_trigger();
+
+    when_mqtt_commit_command_arrives_at(30536);
+    then_the_command_is(COMMAND_ACCEPTED);
+
+    when_time_passes(30600);
+    then_current_state_is(GATE_CLOSE_TRIGGERED);
+    then_we_trigger();
+
+    given_gate_is_moving();
+    when_time_passes(30700);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_down();
+    when_time_passes(30800);
+    then_current_state_is(GATE_CLOSED);
+}
 
 /**
  * Chapter four: Autoclose, non-edge cases.
