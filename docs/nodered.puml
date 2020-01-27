@@ -15,7 +15,7 @@ CLOSE_WARN   -up->      UNKNOWN     : COMMIT cmd accepted
 CLOSE_WARN   -up->      OPEN        : COMMIT cmd\nrejected
 
 BLOCKED:    Lamp yellow
-OPEN:       Autoclose off: Lamp green, then off\nAutoclose on:  Lamp blue
+OPEN:       Autoclose off: Lamp green, then off\nAutoclose on: Lamp blue
 UNKNOWN:    Lamp red
 CLOSED:     Lamp red, then off
 CLOSE_WARN: Lamp blink red 5x,\nthen static red
