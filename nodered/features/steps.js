@@ -29,6 +29,13 @@ When('the gate is blocked', function() {
     });
 });
 
+When('autoclose gets reset', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/autoclose",
+        payload: "reset"
+    });
+});
+
 When('autoclose is pending', function() {
     this.step(this.node_ctx, this.node, {
         topic:   "ctrl/a1234b/autoclose",
