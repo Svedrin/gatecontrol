@@ -47,11 +47,13 @@ switch (current_state) {
             if(msg.payload == "CLOSED"){
                 node_status   = status_closed;
                 lamp_command  = cmd_light_red;
+                lamp_mode     = "cmd-then-off";
                 current_state = "CLOSED";
             }
             else if(msg.payload == "OPEN"){
                 node_status   = status_open;
                 lamp_command  = cmd_light_green;
+                lamp_mode     = "cmd-then-off";
                 current_state = "OPEN";
             }
         }
@@ -63,7 +65,6 @@ switch (current_state) {
             if(msg.payload == "UNKNOWN"){
                 node_status   = status_unknown;
                 lamp_command  = cmd_light_red
-                lamp_mode     = "cmd-then-off";
                 current_state = "UNKNOWN";
             }
         } else if(msg.topic == signal_light_topic && msg.event == "update"){
@@ -107,9 +108,10 @@ switch (current_state) {
 
     case "BLOCKED":
         node_status = status_blocked;
-        if (ctrl_topic ==  "current_hard_position" && msg.payload == "OPEN") {
+        if (ctrl_topic == "current_hard_position" && msg.payload == "OPEN") {
             lamp_command  = cmd_light_green;
             lamp_mode     = "cmd-then-off";
+            node_status   = status_open;
             current_state = "OPEN";
         }
         else {
@@ -118,6 +120,8 @@ switch (current_state) {
         }
         break;
 }
+
+context.set("state", current_state);
 
 // Translate gate_command into {payload: gate_command} or {reset: true}
 if (gate_command === "reset" || current_state !== "CLOSE_WARN") {
@@ -130,12 +134,16 @@ else {
     gate_command = null;
 }
 
-return [
+if (node_status !== null) {
+    node.status(node_status);
+}
+
+node.send([
     (lamp_mode == "direct"       ? {payload: lamp_command} : null),
     (lamp_mode == "cmd-then-off" ? {payload: lamp_command} : {reset: (lamp_command !== null)}),
     (lamp_mode == "blink"        ? {payload: lamp_command} : null),
     gate_command
-];
+]);
 
 //   ----------------->8---------- CUT HERE ----------------------------------
 }
