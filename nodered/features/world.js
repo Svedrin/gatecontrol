@@ -3,13 +3,19 @@ const { step } = require("cpu");
 
 function Node() {
     return {
-        last_status: [],
-        last_messages: [],
+        last_status            : "TEST_FAILED",
+        last_lamp_cmd_direct   : "TEST_FAILED",
+        last_lamp_cmd_then_off : "TEST_FAILED",
+        last_lamp_cmd_blink    : "TEST_FAILED",
+        last_gate_cmd          : "TEST_FAILED",
         status(status) {
-            this.last_status.push(status);
+            this.last_status = status;
         },
         send(msgs) {
-            this.last_messages.push(msgs);
+            this.last_lamp_cmd_direct   = msgs[0];
+            this.last_lamp_cmd_then_off = msgs[1];
+            this.last_lamp_cmd_blink    = msgs[2];
+            this.last_gate_cmd          = msgs[3];
         }
     };
 }

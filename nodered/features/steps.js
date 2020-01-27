@@ -44,37 +44,52 @@ When('autoclose has triggered', function() {
 });
 
 Then("the signal light is switched to red, then off", function() {
-    assert.deepEqual(this.node.last_messages.shift(),
-        [null, {payload: this.cmd_light_red}, null, null]
+    assert.isNull(this.node.last_lamp_cmd_direct);
+    assert.deepEqual(
+        this.node.last_lamp_cmd_then_off,
+        {payload: this.cmd_light_red}
     );
+    assert.isNull(this.node.last_lamp_cmd_blink);
 });
 
 Then("the signal light is switched to red permanently", function() {
-    assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_red}, {reset: true}, null, null]
+    assert.deepEqual(
+        this.node.last_lamp_cmd_direct,
+        {payload: this.cmd_light_red}
     );
+    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: true});
+    assert.isNull(this.node.last_lamp_cmd_blink);
 });
 
 Then("the signal light is switched to yellow permanently", function() {
-    assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_yellow}, {reset: true}, null, null]
+    assert.deepEqual(
+        this.node.last_lamp_cmd_direct,
+        {payload: this.cmd_light_yellow}
     );
+    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: true});
+    assert.isNull(this.node.last_lamp_cmd_blink);
 });
 
 Then("the signal light is switched to green, then off", function() {
-    assert.deepEqual(this.node.last_messages.shift(),
-        [null, {payload: this.cmd_light_green}, null, null]
+    assert.isNull(this.node.last_lamp_cmd_direct);
+    assert.deepEqual(
+        this.node.last_lamp_cmd_then_off,
+        {payload: this.cmd_light_green}
     );
+    assert.isNull(this.node.last_lamp_cmd_blink);
 });
 
 Then("the signal light is switched to blue permanently", function() {
-    assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_blue}, {reset: true}, null, null]
+    assert.deepEqual(
+        this.node.last_lamp_cmd_direct,
+        {payload: this.cmd_light_blue}
     );
+    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: true});
+    assert.isNull(this.node.last_lamp_cmd_blink);
 });
 
 Then("the node status is {string} and says {string}", function(color, text) {
-    assert.deepEqual(this.node.last_status.shift(),
+    assert.deepEqual(this.node.last_status,
         {fill: color, shape: "dot", text: text}
     );
 });
