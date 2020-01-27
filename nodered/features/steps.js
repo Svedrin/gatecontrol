@@ -43,6 +43,13 @@ When('autoclose has triggered', function() {
     });
 });
 
+When('the gate accepts the CLOSED command', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/close_ack",
+        payload: "waiting"
+    });
+});
+
 Then("the signal light blinks red", function() {
     assert.isNull(this.node.last_lamp_cmd_direct);
     assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: true});
@@ -100,5 +107,11 @@ Then("the signal light is switched to blue permanently", function() {
 Then("the node status is {string} and says {string}", function(color, text) {
     assert.deepEqual(this.node.last_status,
         {fill: color, shape: "dot", text: text}
+    );
+});
+
+Then("the gate receives a CLOSED command", function() {
+    assert.deepEqual(this.node.last_gate_cmd,
+        {payload: "CLOSED"}
     );
 });

@@ -35,8 +35,11 @@ Feature: NodeRED
     And the node status is "blue" and says "open+autoclose"
 
     When autoclose has triggered
+    Then the gate receives a CLOSED command
+
+    When the gate accepts the CLOSED command
     Then the signal light blinks red
-    And the node status is "red" and says "open"
+    And the node status is "red" and says "closing"
 
   Scenario: Autoclose pending from "open" state
     When the gate is open
@@ -56,5 +59,8 @@ Feature: NodeRED
     And the node status is "blue" and says "open+autoclose"
 
     When autoclose has triggered
+    Then the gate receives a CLOSED command
+
+    When the gate accepts the CLOSED command
     Then the signal light blinks red
-    And the node status is "red" and says "open"
+    And the node status is "red" and says "closing"

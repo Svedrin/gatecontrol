@@ -22,6 +22,7 @@ var cmd_light_green  = { on: true, hex: "#28A745", duration: 100, bri: 60 };
 var cmd_light_blue   = { on: true, hex: "#32d2ff", duration: 100, bri: 60 };
 var status_open      = { fill: "red",    shape: "dot", text: "open"    };
 var status_unknown   = { fill: "yellow", shape: "dot", text: "unknown" };
+var status_closing   = { fill: "red",    shape: "dot", text: "closing" };
 var status_closed    = { fill: "green",  shape: "dot", text: "closed"  };
 var status_blocked   = { fill: "yellow", shape: "dot", text: "blocked" };
 var status_autoclose = { fill: "blue",   shape: "dot", text: "open+autoclose" };
@@ -45,17 +46,24 @@ switch (current_state) {
     case "UNKNOWN":
         node_status = status_unknown;
         if (ctrl_topic == "current_hard_position") {
-            if(msg.payload == "CLOSED"){
-                node_status   = status_closed;
-                lamp_command  = cmd_light_red;
-                lamp_mode     = "cmd-then-off";
-                current_state = "CLOSED";
-            }
-            else if(msg.payload == "OPEN"){
-                node_status   = status_open;
-                lamp_command  = cmd_light_green;
-                lamp_mode     = "cmd-then-off";
-                current_state = "OPEN";
+            switch (msg.payload) {
+                case "CLOSED":
+                    node_status   = status_closed;
+                    lamp_command  = cmd_light_red;
+                    lamp_mode     = "cmd-then-off";
+                    current_state = "CLOSED";
+                    break;
+                case "BLOCKED":
+                    node_status   = status_blocked;
+                    lamp_command  = cmd_light_yellow;
+                    current_state = "BLOCKED";
+                    break;
+                case "OPEN":
+                    node_status   = status_open;
+                    lamp_command  = cmd_light_green;
+                    lamp_mode     = "cmd-then-off";
+                    current_state = "OPEN";
+                    break;
             }
         }
         break;
@@ -68,7 +76,8 @@ switch (current_state) {
                 lamp_command  = cmd_light_red
                 current_state = "UNKNOWN";
             }
-        } else if(msg.topic == signal_light_topic && msg.event == "update"){
+        }
+        else if(msg.topic == signal_light_topic && msg.event == "update"){
             lamp_command = cmd_light_red;
             lamp_mode    = "cmd-then-off";
         }
@@ -76,7 +85,7 @@ switch (current_state) {
 
     case "OPEN":
         node_status = status_open;
-        if(ctrl_topic ==  "current_hard_position"){
+        if(ctrl_topic == "current_hard_position"){
             switch(msg.payload) {
                 case "UNKNOWN":
                     node_status   = status_unknown;
@@ -103,11 +112,10 @@ switch (current_state) {
             msg.topic == "CloseBtn" ||
             (ctrl_topic == "autoclose" && msg.payload == "triggered")
         ){
-            lamp_command  = cmd_light_red;
-            lamp_mode     = "blink";
             gate_command  = "CLOSED";
             current_state = "CLOSE_WARN";
-        } else if(msg.topic == signal_light_topic && msg.event == "update"){
+        }
+        else if(msg.topic == signal_light_topic && msg.event == "update"){
             lamp_command = cmd_light_green;
             lamp_mode    = "cmd-then-off";
         }
@@ -129,6 +137,14 @@ switch (current_state) {
         else {
             lamp_command = cmd_light_yellow;
             lamp_mode    = "direct";
+        }
+        break;
+
+    case "CLOSE_WARN":
+        if(ctrl_topic == "close_ack" && msg.payload == "waiting") {
+            lamp_command  = cmd_light_red;
+            lamp_mode     = "blink";
+            node_status   = status_closing;
         }
         break;
 }
