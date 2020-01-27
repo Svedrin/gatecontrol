@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo >&2 "make called plantuml, but it should not try this"
+exit 1

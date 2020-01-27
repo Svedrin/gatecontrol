@@ -22,6 +22,7 @@ steps:
   - platformio lib install PubSubClient
   - "[ ! -e include/WifiParams.h ] && cp ci/WifiParams.h include/"
   - pio run -e d1_mini
+  - cp ci/plantuml /usr/local/bin/
   - cd docs && LANG=C make | grep -q "Nothing to be done"
 
 - name: test_nodejs
@@ -39,6 +40,6 @@ steps:
     - test_nodejs
 ---
 kind: signature
-hmac: a873bbb6b821043c34e8d11df2802e51ac91c4ed31e65abb093d19c1b428740c
+hmac: 55f03e6bdd5f25b3dc15c10d2bd2d7ee224f1b50e96eea53df69c2b3a65806e4
 
 ...
