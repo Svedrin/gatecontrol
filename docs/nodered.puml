@@ -11,9 +11,8 @@ UNKNOWN      -left->    OPEN        : OPEN
 OPEN         -left->    BLOCKED     : BLOCKED
 
 OPEN         -down->    CLOSE_WARN  : CloseBtn or\nAutoclose Triggered\n-> send CLOSE cmd
-CLOSE_WARN   -right->   CLOSE_TRGR  : COMMIT cmd accepted
+CLOSE_WARN   -up->      UNKNOWN     : COMMIT cmd accepted
 CLOSE_WARN   -up->      OPEN        : COMMIT cmd\nrejected
-CLOSE_TRGR   -up->      UNKNOWN     : UNKNOWN
 
 BLOCKED:    Lamp yellow
 OPEN:       Autoclose off: Lamp green, then off\nAutoclose on:  Lamp blue
