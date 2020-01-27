@@ -45,31 +45,31 @@ When('autoclose has triggered', function() {
 
 Then("the signal light is switched to red, then off", function() {
     assert.deepEqual(this.node.last_messages.shift(),
-        [null, {payload: this.cmd_light_red}, null]
+        [null, {payload: this.cmd_light_red}, null, null]
     );
 });
 
 Then("the signal light is switched to red permanently", function() {
     assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_red}, {reset: true}, null]
+        [{payload: this.cmd_light_red}, {reset: true}, null, null]
     );
 });
 
 Then("the signal light is switched to yellow permanently", function() {
     assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_yellow}, {reset: true}, null]
+        [{payload: this.cmd_light_yellow}, {reset: true}, null, null]
     );
 });
 
 Then("the signal light is switched to green, then off", function() {
     assert.deepEqual(this.node.last_messages.shift(),
-        [null, {payload: this.cmd_light_green}, null]
+        [null, {payload: this.cmd_light_green}, null, null]
     );
 });
 
 Then("the signal light is switched to blue permanently", function() {
     assert.deepEqual(this.node.last_messages.shift(),
-        [{payload: this.cmd_light_blue}, {reset: true}, null]
+        [{payload: this.cmd_light_blue}, {reset: true}, null, null]
     );
 });
 
