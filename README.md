@@ -66,7 +66,11 @@ Also note that I'm thinking about re-using the Status LED to also drive a relay 
 
 # NodeRED
 
-For GUI and for controlling the signal light, I use NodeRED. The main part of the setup is [the CPU node](nodered/cpu.js).
+For GUI and for controlling the signal light, I use NodeRED. Here's the flow:
+
+![nodered_flow](docs/nodered_flow.png)
+
+The main part of the setup is [the CPU node](nodered/cpu.js). Its state machine can be admired here:
 
 ![nodered](docs/nodered.png)
 
