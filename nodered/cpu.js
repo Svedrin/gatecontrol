@@ -133,10 +133,6 @@ switch (current_state) {
             node_status   = status_autoclose;
             current_state = "OPEN";
         }
-        else {
-            lamp_command = cmd_light_yellow;
-            lamp_mode    = "direct";
-        }
         break;
 
     case "CLOSE_WARN":
