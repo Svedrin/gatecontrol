@@ -153,7 +153,7 @@ Then("the gate receives a CLOSED command", function() {
 
 Then("no commands are sent", function() {
     assert.isNull(this.node.last_lamp_cmd_direct);
-    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: false});
+    assert.isNull(this.node.last_lamp_cmd_then_off);
     assert.isNull(this.node.last_lamp_cmd_blink);
     assert.deepEqual(this.node.last_gate_cmd, {reset: true});
 });

@@ -179,8 +179,10 @@ switch (current_state) {
 context.set("state", current_state);
 
 // Translate lamp_command into {payload: lamp_command} or null
+var lamp_reset = null;
 if (lamp_command !== null) {
     lamp_command = {payload: lamp_command};
+    lamp_reset   = {reset: true};
 }
 
 // Translate gate_command into {payload: gate_command} or {reset: true}
@@ -200,7 +202,7 @@ if (node_status !== null) {
 
 node.send([
     (lamp_mode == "direct"       ? lamp_command : null),
-    (lamp_mode == "cmd-then-off" ? lamp_command : {reset: (lamp_command !== null)}),
+    (lamp_mode == "cmd-then-off" ? lamp_command : lamp_reset),
     (lamp_mode == "blink"        ? lamp_command : null),
     gate_command
 ]);
