@@ -26,9 +26,14 @@ Feature: NodeRED
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
 
+    When the gate is blocked
+    Then the signal light is switched to yellow permanently
+    And the node status is "yellow" and says "blocked"
+
     When autoclose is pending
     Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
 
     When autoclose has triggered
-    Then the signal light is switched to red permanently
+    Then the signal light blinks red
     And the node status is "red" and says "open"

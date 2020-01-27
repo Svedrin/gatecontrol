@@ -43,6 +43,15 @@ When('autoclose has triggered', function() {
     });
 });
 
+Then("the signal light blinks red", function() {
+    assert.isNull(this.node.last_lamp_cmd_direct);
+    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: true});
+    assert.deepEqual(
+        this.node.last_lamp_cmd_blink,
+        {payload: this.cmd_light_red}
+    );
+});
+
 Then("the signal light is switched to red, then off", function() {
     assert.isNull(this.node.last_lamp_cmd_direct);
     assert.deepEqual(

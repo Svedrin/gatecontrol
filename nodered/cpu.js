@@ -24,6 +24,7 @@ var status_open      = { fill: "red",    shape: "dot", text: "open"    };
 var status_unknown   = { fill: "yellow", shape: "dot", text: "unknown" };
 var status_closed    = { fill: "green",  shape: "dot", text: "closed"  };
 var status_blocked   = { fill: "yellow", shape: "dot", text: "blocked" };
+var status_autoclose = { fill: "blue",   shape: "dot", text: "open+autoclose" };
 
 // Input: Let's see what kinda message we've got
 
@@ -89,12 +90,18 @@ switch (current_state) {
                     break;
             }
         }
+        else if(ctrl_topic == "autoclose" && msg.payload == "reset") {
+            lamp_command = cmd_light_green;
+            lamp_mode    = "cmd-then-off";
+            node_status  = status_open;
+        }
         else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
             lamp_command = cmd_light_blue;
+            node_status  = status_autoclose;
         }
         else if(
             msg.topic == "CloseBtn" ||
-            (ctrl_topic == "/autoclose" && msg.payload == "triggered")
+            (ctrl_topic == "autoclose" && msg.payload == "triggered")
         ){
             lamp_command  = cmd_light_red;
             lamp_mode     = "blink";
@@ -114,6 +121,11 @@ switch (current_state) {
             node_status   = status_open;
             current_state = "OPEN";
         }
+        else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
+            lamp_command  = cmd_light_blue;
+            node_status   = status_autoclose;
+            current_state = "OPEN";
+        }
         else {
             lamp_command = cmd_light_yellow;
             lamp_mode    = "direct";
@@ -122,6 +134,11 @@ switch (current_state) {
 }
 
 context.set("state", current_state);
+
+// Translate lamp_command into {payload: lamp_command} or null
+if (lamp_command !== null) {
+    lamp_command = {payload: lamp_command};
+}
 
 // Translate gate_command into {payload: gate_command} or {reset: true}
 if (gate_command === "reset" || current_state !== "CLOSE_WARN") {
@@ -139,9 +156,9 @@ if (node_status !== null) {
 }
 
 node.send([
-    (lamp_mode == "direct"       ? {payload: lamp_command} : null),
-    (lamp_mode == "cmd-then-off" ? {payload: lamp_command} : {reset: (lamp_command !== null)}),
-    (lamp_mode == "blink"        ? {payload: lamp_command} : null),
+    (lamp_mode == "direct"       ? lamp_command : null),
+    (lamp_mode == "cmd-then-off" ? lamp_command : {reset: (lamp_command !== null)}),
+    (lamp_mode == "blink"        ? lamp_command : null),
     gate_command
 ]);
 
