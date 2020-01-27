@@ -159,7 +159,7 @@ switch (current_state) {
                     break;
             }
         }
-        if(ctrl_topic == "current_hard_position"){
+        else if(ctrl_topic == "current_hard_position"){
             switch(msg.payload) {
                 case "UNKNOWN":
                     node_status   = status_unknown;
