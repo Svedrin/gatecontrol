@@ -137,14 +137,18 @@ void on_mqtt_message(char* topic, byte* payload, unsigned int length) {
     if( strcmp(topic, mqtt_topic_commands) == 0 ){
         if(strncmp((const char *)payload, "CLOSED", length) == 0){
             Serial.println("Received CLOSE message");
-            if(state_machine.cmd_close(millis()) == COMMAND_ACCEPTED){
+            if (state_machine.cmd_close(millis()) == COMMAND_ACCEPTED) {
                 client.publish(mqtt_topic_command_acks, "waiting");
+            } else {
+                client.publish(mqtt_topic_command_acks, "reject");
             }
         }
         else if(strncmp((const char *)payload, "COMMIT", length) == 0){
             Serial.println("Received COMMIT message");
-            if(state_machine.cmd_commit(millis()) == COMMAND_ACCEPTED){
+            if (state_machine.cmd_commit(millis()) == COMMAND_ACCEPTED) {
                 client.publish(mqtt_topic_command_acks, "commit");
+            } else {
+                client.publish(mqtt_topic_command_acks, "abort");
             }
         }
     }
