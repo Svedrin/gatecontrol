@@ -9,6 +9,7 @@ if (msg.topic == "lifx/ampel") {
     context.set("last_update", new Date());
 }
 else if (msg.payload == "CLOSED") {
+    context.set("last_update", 0);
     return msg;
 }
 else if (msg.payload == "COMMIT") {
@@ -16,5 +17,10 @@ else if (msg.payload == "COMMIT") {
         new Date(context.get("last_update") || 0);
     if (new Date() - last_update < 10000) {
         return msg;
+    } else {
+        node.warn(
+            "COMMIT but haven't heard back " +
+            "from the signal light, blocking"
+        );
     }
 }
