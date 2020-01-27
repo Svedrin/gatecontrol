@@ -3,10 +3,14 @@ function step(context, node, msg) {
 /**
  * Node outputs:
  *  1. LIFX Light (directly)
- *  2. LIFX Light via a trigger node that sends "off" 30 seconds after our command
+ *  2. LIFX Light via a trigger node that sends "off" 120 seconds after our command
  *  3. LIFX Light via a function node that lets it blink 5 times, then static on
  *     see blink-then-on.js
- *  4. Gate controller set_hard_position
+ *  4. Gate controller set_hard_position via
+ *     * a trigger node that sends "COMMIT" 10 seconds after our command,
+ *     * a function node that only allows the COMMIT to go through if it
+ *       received messages on the lifx/ampel topic in the last 10 seconds
+ *       see commit-guard.js
  */
 
 var tor_esp = "a1234b";
@@ -23,112 +27,115 @@ var status_blocked   = { fill: "yellow", shape: "dot", text: "blocked" };
 
 // Input: Let's see what kinda message we've got
 
-var current_hard_position = null;
-var node_status = null;
+var ctrl_topic   = "<none>";
+var node_status  = null;
+var lamp_command = null;
+var lamp_mode    = "direct"; // others: "cmd-then-off", "blink"
+var gate_command = null;
 
-if (msg.topic == signal_light_topic) {
-    // LIFX lights ack a change by sending msg.event="change"
-    context.set("last_signal_light_message_recv_at", new Date());
+if (msg.topic.startsWith("ctrl/")) {
+    // "ctrl/a1234b/something" -> "something"
+    ctrl_topic = msg.topic.split("/")[2];
 }
-else if (msg.topic == "ctrl/" + tor_esp + "/current_hard_position") {
-    current_hard_position = msg.payload;
-}
 
-var last_signal_light_message_recv_at =
-    new Date(context.get("last_signal_light_message_recv_at") || 0);
+var current_state = context.get("state") || "UNKNOWN";
 
-switch(context.get("state") || "UNKNOWN"){
+switch (current_state) {
     case "UNKNOWN":
         node_status = status_unknown;
-        if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
+        if (ctrl_topic == "current_hard_position") {
             if(msg.payload == "CLOSED"){
-                node_status = status_closed;
-                node.send([null, {payload: cmd_light_red}, null, null]);
-                context.set("state", "CLOSED");
+                node_status   = status_closed;
+                lamp_command  = cmd_light_red;
+                current_state = "CLOSED";
             }
             else if(msg.payload == "OPEN"){
-                node_status = status_open;
-                node.send([null, {payload: cmd_light_green}, null, null]);
-                context.set("state", "OPEN");
+                node_status   = status_open;
+                lamp_command  = cmd_light_green;
+                current_state = "OPEN";
             }
         }
-        node.status(node_status);
         break;
 
     case "CLOSED":
         node_status = status_closed;
-        if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
+        if(ctrl_topic == "current_hard_position"){
             if(msg.payload == "UNKNOWN"){
-                node_status = status_unknown;
-                node.send([{payload: cmd_light_red}, {reset: true}, null, null]);
-                context.set("state", "UNKNOWN");
+                node_status   = status_unknown;
+                lamp_command  = cmd_light_red
+                lamp_mode     = "cmd-then-off";
+                current_state = "UNKNOWN";
             }
-        } else if(msg.topic == "lifx/ampel" && msg.event == "update"){
-            node.send([null, {payload: cmd_light_red}, null]);
+        } else if(msg.topic == signal_light_topic && msg.event == "update"){
+            lamp_command = cmd_light_red;
+            lamp_mode    = "cmd-then-off";
         }
-        node.status(node_status);
         break;
 
     case "OPEN":
         node_status = status_open;
-        if(msg.topic == "ctrl/" + tor_esp + "/current_hard_position"){
+        if(ctrl_topic ==  "current_hard_position"){
             switch(msg.payload) {
                 case "UNKNOWN":
-                    node_status = status_unknown;
-                    node.send([{payload: cmd_light_red}, {reset: true}, null, null]);
-                    context.set("state", "UNKNOWN");
+                    node_status   = status_unknown;
+                    lamp_command  = cmd_light_red;
+                    current_state = "UNKNOWN";
                     break;
                 case "BLOCKED":
-                    node_status = status_blocked;
-                    node.send([{payload: cmd_light_yellow}, {reset: true}, null, null]);
-                    context.set("state", "BLOCKED");
+                    node_status   = status_blocked;
+                    lamp_command  = cmd_light_yellow;
+                    current_state = "BLOCKED";
                     break;
             }
         }
-        else if(
-            msg.topic == "ctrl/" + tor_esp + "/autoclose" &&
-            msg.payload == "pending"
-        ) {
-            node.send([{payload: cmd_light_blue}, {reset: true}, null, null]);
+        else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
+            lamp_command = cmd_light_blue;
         }
         else if(
             msg.topic == "CloseBtn" ||
-            (
-                msg.topic == "ctrl/" + tor_esp + "/autoclose" &&
-                msg.payload == "triggered"
-            )
+            (ctrl_topic == "/autoclose" && msg.payload == "triggered")
         ){
-            context.set("state", "CLOSE_WARN");
-            context.set("warn_start", new Date());
-
-            node.send([null, null, {payload: cmd_light_red}, {payload: "CLOSED"}]);
-
-            setTimeout(function(){
-                if( context.get("state") == "CLOSE_WARN" ){
-                    node.send([null, null, {payload: "COMMIT"}]);
-                    context.set("state", "OPEN");
-                }
-            }, 10000);
-        } else if(msg.topic == "lifx/ampel" && msg.event == "update"){
-            node.send([null, {payload: cmd_light_green}, null, null]);
+            lamp_command  = cmd_light_red;
+            lamp_mode     = "blink";
+            gate_command  = "CLOSED";
+            current_state = "CLOSE_WARN";
+        } else if(msg.topic == signal_light_topic && msg.event == "update"){
+            lamp_command = cmd_light_green;
+            lamp_mode    = "cmd-then-off";
         }
-        node.status(node_status);
         break;
 
     case "BLOCKED":
-        if(
-            msg.topic == "ctrl/" + tor_esp + "/current_hard_position" &&
-            msg.payload == "OPEN"
-        ){
-            node.status(status_open);
-            node.send([null, {payload: cmd_light_green}, null, null]);
-            context.set("state", "OPEN");
+        node_status = status_blocked;
+        if (ctrl_topic ==  "current_hard_position" && msg.payload == "OPEN") {
+            lamp_command  = cmd_light_green;
+            lamp_mode     = "cmd-then-off";
+            current_state = "OPEN";
         }
         else {
-            node.send([{payload: cmd_light_yellow}, {reset: true}, null, null]);
+            lamp_command = cmd_light_yellow;
+            lamp_mode    = "direct";
         }
         break;
 }
+
+// Translate gate_command into {payload: gate_command} or {reset: true}
+if (gate_command === "reset" || current_state !== "CLOSE_WARN") {
+    gate_command = {reset: true};
+}
+else if (gate_command === "CLOSED") {
+    gate_command = {payload: gate_command};
+}
+else {
+    gate_command = null;
+}
+
+return [
+    (lamp_mode == "direct"       ? {payload: lamp_command} : null),
+    (lamp_mode == "cmd-then-off" ? {payload: lamp_command} : {reset: (lamp_command !== null)}),
+    (lamp_mode == "blink"        ? {payload: lamp_command} : null),
+    gate_command
+];
 
 //   ----------------->8---------- CUT HERE ----------------------------------
 }
