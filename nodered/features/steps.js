@@ -43,10 +43,38 @@ When('autoclose has triggered', function() {
     });
 });
 
+When('the Close button in the GUI is pressed', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "CloseBtn",
+        payload: "CloseBtn"
+    });
+});
+
 When('the gate accepts the CLOSED command', function() {
     this.step(this.node_ctx, this.node, {
         topic:   "ctrl/a1234b/close_ack",
         payload: "waiting"
+    });
+});
+
+When('the gate rejects the CLOSED command', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/close_ack",
+        payload: "reject"
+    });
+});
+
+When('the gate accepts the COMMIT command', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/close_ack",
+        payload: "commit"
+    });
+});
+
+When('the gate rejects the COMMIT command', function() {
+    this.step(this.node_ctx, this.node, {
+        topic:   "ctrl/a1234b/close_ack",
+        payload: "abort"
     });
 });
 
@@ -114,4 +142,11 @@ Then("the gate receives a CLOSED command", function() {
     assert.deepEqual(this.node.last_gate_cmd,
         {payload: "CLOSED"}
     );
+});
+
+Then("no commands are sent", function() {
+    assert.isNull(this.node.last_lamp_cmd_direct);
+    assert.deepEqual(this.node.last_lamp_cmd_then_off, {reset: false});
+    assert.isNull(this.node.last_lamp_cmd_blink);
+    assert.deepEqual(this.node.last_gate_cmd, {reset: true});
 });

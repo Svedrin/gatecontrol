@@ -13,7 +13,6 @@ function step(context, node, msg) {
  *       see commit-guard.js
  */
 
-var tor_esp = "a1234b";
 var signal_light_topic = "lifx/ampel";
 
 var cmd_light_red    = { on: true, hex: "#DC3545", duration: 100, bri: 60 };
@@ -141,10 +140,42 @@ switch (current_state) {
         break;
 
     case "CLOSE_WARN":
-        if(ctrl_topic == "close_ack" && msg.payload == "waiting") {
-            lamp_command  = cmd_light_red;
-            lamp_mode     = "blink";
-            node_status   = status_closing;
+        if(ctrl_topic == "close_ack") {
+            switch (msg.payload) {
+                case "waiting":
+                    lamp_command  = cmd_light_red;
+                    lamp_mode     = "blink";
+                    node_status   = status_closing;
+                    break;
+
+                case "reject":
+                case "abort":
+                    lamp_command  = cmd_light_green;
+                    lamp_mode     = "cmd-then-off";
+                    node_status   = status_open;
+                    current_state = "OPEN";
+                    break;
+
+                case "commit":
+                    lamp_command  = cmd_light_red;
+                    node_status   = status_closing;
+                    current_state = "UNKNOWN";
+                    break;
+            }
+        }
+        if(ctrl_topic == "current_hard_position"){
+            switch(msg.payload) {
+                case "UNKNOWN":
+                    node_status   = status_unknown;
+                    lamp_command  = cmd_light_red;
+                    current_state = "UNKNOWN";
+                    break;
+                case "BLOCKED":
+                    node_status   = status_blocked;
+                    lamp_command  = cmd_light_yellow;
+                    current_state = "BLOCKED";
+                    break;
+            }
         }
         break;
 }
