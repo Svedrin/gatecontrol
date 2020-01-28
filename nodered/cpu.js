@@ -40,6 +40,7 @@ if (msg.topic.startsWith("ctrl/")) {
 }
 
 var current_state = context.get("state") || "UNKNOWN";
+var autoclose_on  = context.get("autoclose_on") || false;
 
 switch (current_state) {
     case "UNKNOWN":
@@ -51,6 +52,7 @@ switch (current_state) {
                     lamp_command  = cmd_light_red;
                     lamp_mode     = "cmd-then-off";
                     current_state = "CLOSED";
+                    context.set("autoclose_on", false);
                     break;
                 case "BLOCKED":
                     node_status   = status_blocked;
@@ -58,12 +60,20 @@ switch (current_state) {
                     current_state = "BLOCKED";
                     break;
                 case "OPEN":
-                    node_status   = status_open;
-                    lamp_command  = cmd_light_green;
-                    lamp_mode     = "cmd-then-off";
+                    if (autoclose_on) {
+                        lamp_command = cmd_light_blue;
+                        node_status  = status_autoclose;
+                    } else {
+                        node_status   = status_open;
+                        lamp_command  = cmd_light_green;
+                        lamp_mode     = "cmd-then-off";
+                    }
                     current_state = "OPEN";
                     break;
             }
+        }
+        else if(ctrl_topic == "autoclose" && msg.payload == "enabled") {
+            context.set("autoclose_on", true);
         }
         break;
 
@@ -75,6 +85,9 @@ switch (current_state) {
                 lamp_command  = cmd_light_red
                 current_state = "UNKNOWN";
             }
+        }
+        else if(ctrl_topic == "autoclose" && msg.payload == "enabled") {
+            context.set("autoclose_on", true);
         }
         else if(msg.topic == signal_light_topic && msg.event == "update"){
             lamp_command = cmd_light_red;
@@ -98,12 +111,19 @@ switch (current_state) {
                     break;
             }
         }
+        else if(ctrl_topic == "autoclose" && msg.payload == "enabled") {
+            context.set("autoclose_on", true);
+            lamp_command = cmd_light_blue;
+            node_status  = status_autoclose;
+        }
         else if(ctrl_topic == "autoclose" && msg.payload == "reset") {
+            context.set("autoclose_on", false);
             lamp_command = cmd_light_green;
             lamp_mode    = "cmd-then-off";
             node_status  = status_open;
         }
         else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
+            context.set("autoclose_on", true);
             lamp_command = cmd_light_blue;
             node_status  = status_autoclose;
         }
@@ -123,9 +143,14 @@ switch (current_state) {
     case "BLOCKED":
         node_status = status_blocked;
         if (ctrl_topic == "current_hard_position" && msg.payload == "OPEN") {
-            lamp_command  = cmd_light_green;
-            lamp_mode     = "cmd-then-off";
-            node_status   = status_open;
+            if (autoclose_on) {
+                lamp_command = cmd_light_blue;
+                node_status  = status_autoclose;
+            } else {
+                node_status   = status_open;
+                lamp_command  = cmd_light_green;
+                lamp_mode     = "cmd-then-off";
+            }
             current_state = "OPEN";
         }
         else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
