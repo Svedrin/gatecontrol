@@ -859,7 +859,7 @@ void test_autoclose_user_first_then_down() {
     when_time_passes(60);
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
-    then_autoclose_is(AUTOCLOSE_OFF);
+    then_autoclose_is(AUTOCLOSE_RESET);
 
     given_gate_is_down();
     when_time_passes(70);
@@ -888,7 +888,7 @@ void test_autoclose_user_first_then_up() {
     when_time_passes(60);
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
-    then_autoclose_is(AUTOCLOSE_OFF);
+    then_autoclose_is(AUTOCLOSE_RESET);
 
     // Now they change their mind and move the gate back up
     given_gate_is_up();
