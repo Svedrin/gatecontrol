@@ -37,6 +37,10 @@ This scheme basically implements [two-phase commit](https://en.wikipedia.org/wik
 
 The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
 
+I'm using a LIFX light bulb for the signal light:
+
+![signal](docs/photo_2020-01-28_23-49-49.jpg)
+
 # Physical setup
 
 You'll need:
