@@ -287,6 +287,35 @@ Feature: NodeRED
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
 
+  Scenario: Autoclose pending from "closed" state
+
+    Check that when autoclose is enabled while the gate is in
+    closed state, this fact gets preserved and when the gate
+    eventually reaches OPEN, the light gets switched to blue.
+
+    When the gate is closed
+    Then the signal light is switched to red, then off
+    And the node status is "green" and says "closed"
+
+    When autoclose has been enabled
+    Then no commands are sent
+
+    When the gate is moving
+    Then the signal light is switched to red permanently
+    And the node status is "yellow" and says "unknown"
+
+    When the gate is open
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose gets reset
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
   Scenario: CLOSED command gets rejected
 
     Let's see what happens when a CLOSED command is rejected by the ESP.
