@@ -567,7 +567,7 @@ void test_autoclose_from_closed() {
     when_time_passes(20);
     then_current_state_is(GATE_OPEN_TRIGGERED);
     then_we_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
 
     when_time_passes(25);
     then_current_state_is(GATE_OPEN_TRIGGERED);
@@ -649,7 +649,7 @@ void test_autoclose_from_unknown() {
     given_autoclose_button_is_pressed();
     when_time_passes(30);
     then_current_state_is(GATE_UNKNOWN);
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
     then_we_do_not_trigger();
 
     given_autoclose_button_is_released();
@@ -683,7 +683,7 @@ void test_autoclose_from_open() {
     when_time_passes(20);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
 
     when_time_passes(25);
     then_current_state_is(GATE_OPEN);
@@ -716,7 +716,7 @@ void test_autoclose_cancel() {
     when_time_passes(20);
     then_current_state_is(GATE_OPEN_TRIGGERED);
     then_we_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
 
     given_autoclose_button_is_released();
     when_time_passes(30);
@@ -754,7 +754,7 @@ void test_autoclose_fast_gate() {
     when_time_passes(20);
     then_current_state_is(GATE_OPEN_TRIGGERED);
     then_we_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
 
     when_time_passes(25);
     then_current_state_is(GATE_OPEN_TRIGGERED);
@@ -792,7 +792,7 @@ void test_autoclose_broken_gate() {
     when_time_passes(20);
     then_current_state_is(GATE_OPEN_TRIGGERED);
     then_we_trigger();
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
 
     when_time_passes(25);
     then_current_state_is(GATE_OPEN_TRIGGERED);
@@ -905,7 +905,7 @@ void test_autoclose_light_barrier_timing() {
     when_time_passes(100);
     given_autoclose_button_is_pressed();
     when_time_passes(200);
-    then_autoclose_is(AUTOCLOSE_ON);
+    then_autoclose_is(AUTOCLOSE_ENABLED);
     then_current_state_is(GATE_OPEN);
     given_autoclose_button_is_released();
     when_time_passes(300);

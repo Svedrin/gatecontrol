@@ -217,7 +217,10 @@ void loop() {
 
         // autoclose_state indicates when certain events have happened
         // and are only set for the one step where they happened
-        if (step.autoclose_state == AUTOCLOSE_PENDING) {
+        if (step.autoclose_state == AUTOCLOSE_ENABLED) {
+            client.publish(mqtt_topic_autoclose, "enabled");
+        }
+        else if (step.autoclose_state == AUTOCLOSE_PENDING) {
             client.publish(mqtt_topic_autoclose, "pending");
         }
         else if (step.autoclose_state == AUTOCLOSE_RESET) {

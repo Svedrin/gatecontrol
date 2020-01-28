@@ -43,6 +43,7 @@ typedef struct esp_state_t {
 
 typedef enum {
     AUTOCLOSE_OFF,        // Autoclose is not enabled, nothing will happen.
+    AUTOCLOSE_ENABLED,    // Autoclose has just been enabled.
     AUTOCLOSE_ON,         // Autoclose is enabled, but not currently active.
     AUTOCLOSE_PENDING,    // Autoclose is enabled and the clock has started ticking.
     AUTOCLOSE_RESET,      // Autoclose is enabled but the clock has been reset because the Light Barrier is blocked.

@@ -70,7 +70,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
                 this->autoclose_enabled_at = esp_state->millis;
-                next_step.autoclose_state = AUTOCLOSE_ON;
+                next_step.autoclose_state = AUTOCLOSE_ENABLED;
             }
             break;
 
@@ -85,7 +85,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             }
             else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
                 this->autoclose_enabled_at = esp_state->millis;
-                next_step.autoclose_state = AUTOCLOSE_ON;
+                next_step.autoclose_state = AUTOCLOSE_ENABLED;
             }
             break;
 
@@ -97,7 +97,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                 this->autoclose_enabled_at = esp_state->millis;
                 this->current_state = GATE_OPEN_TRIGGERED;
                 this->triggered_at  = esp_state->millis;
-                next_step.autoclose_state = AUTOCLOSE_ON;
+                next_step.autoclose_state = AUTOCLOSE_ENABLED;
                 next_step.trigger = true;
             }
             else if (
