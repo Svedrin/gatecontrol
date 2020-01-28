@@ -2,19 +2,23 @@
 
 ESP8266 firmware that implements a garage gate controller.
 
-# Physical setup
+# NodeRED
 
-You'll need:
+For GUI and for controlling the signal light, I use NodeRED. Here's the flow:
 
-* a garage gate equipped with a motor
-* one sensor each at the top and bottom end positions to locate the gate
-* a light barrier
-* WiFi, MQTT
-* a signal light with which you warn people before automatically closing the gate.
+![nodered_flow](docs/nodered_flow.png)
 
-# Status indication
+The main part of the setup is [the CPU node](nodered/cpu.js). Its state machine can be admired here:
 
-The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light.
+![nodered](docs/nodered.png)
+
+# Controller State Machine
+
+![statemachine](docs/statemachine.png)
+
+# Autoclosing
+
+When you want to leave the garage, having to close the gate manually can be a nuisance. Thus the controller supports autoclose, through a separate physical button connected to one of the inputs. The controller then monitors the light barrier, and if it was clear for a while, automatically closes the gate. Again, using the status indications published on `ctrl/<ChipID>/autoclose` to drive a signal light is highly encouraged.
 
 # Remote closing
 
@@ -29,9 +33,19 @@ To command the controller to close the gate:
 
 This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or the orchestrator being rebooted), the gate does not start moving unexpectedly.
 
-# Autoclosing
+# Status indication
 
-When you want to leave the garage, having to close the gate manually can be a nuisance. Thus the controller supports autoclose, through a separate physical button connected to one of the inputs. The controller then monitors the light barrier, and if it was clear for a while, automatically closes the gate. Again, using the status indications published on `ctrl/<ChipID>/autoclose` to drive a signal light is highly encouraged.
+The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
+
+# Physical setup
+
+You'll need:
+
+* a garage gate equipped with a motor
+* one sensor each at the top and bottom end positions to locate the gate
+* a light barrier
+* WiFi, MQTT
+* a signal light with which you warn people before automatically closing the gate.
 
 # ESP Pinout
 
@@ -59,20 +73,6 @@ Also note that I'm thinking about re-using the Status LED to also drive a relay 
 
 * Error LED: Blinks while connecting to WiFi, off while running, static when error
 * Status LED: Static when autoclose enabled, blinks when about to close
-
-# State Machine
-
-![statemachine](docs/statemachine.png)
-
-# NodeRED
-
-For GUI and for controlling the signal light, I use NodeRED. Here's the flow:
-
-![nodered_flow](docs/nodered_flow.png)
-
-The main part of the setup is [the CPU node](nodered/cpu.js). Its state machine can be admired here:
-
-![nodered](docs/nodered.png)
 
 # Disclaimer
 
