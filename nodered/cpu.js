@@ -143,16 +143,25 @@ switch (current_state) {
 
     case "BLOCKED":
         node_status = status_blocked;
-        if (ctrl_topic == "current_hard_position" && msg.payload == "OPEN") {
-            if (autoclose_on) {
-                lamp_command = cmd_light_blue;
-                node_status  = status_autoclose;
-            } else {
-                node_status   = status_open;
-                lamp_command  = cmd_light_green;
-                lamp_mode     = "cmd-then-off";
+        if (ctrl_topic == "current_hard_position") {
+            switch (msg.payload) {
+                case "OPEN":
+                    if (autoclose_on) {
+                        lamp_command = cmd_light_blue;
+                        node_status  = status_autoclose;
+                    } else {
+                        node_status   = status_open;
+                        lamp_command  = cmd_light_green;
+                        lamp_mode     = "cmd-then-off";
+                    }
+                    current_state = "OPEN";
+                    break;
+                case "UNKNOWN":
+                    node_status   = status_unknown;
+                    lamp_command  = cmd_light_red;
+                    current_state = "UNKNOWN";
+                    break;
             }
-            current_state = "OPEN";
         }
         else if(ctrl_topic == "autoclose" && msg.payload == "pending") {
             lamp_command  = cmd_light_blue;
