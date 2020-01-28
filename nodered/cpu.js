@@ -133,6 +133,7 @@ switch (current_state) {
         ){
             gate_command  = "CLOSED";
             current_state = "CLOSE_WARN";
+            context.set("autoclose_on", false);
         }
         else if(msg.topic == signal_light_topic && msg.event == "update"){
             lamp_command = cmd_light_green;
