@@ -65,7 +65,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
             else if (this->autoclose_enabled_at) {
                 if (esp_state->millis > this->autoclose_enabled_at + AUTOCLOSE_TIMEOUT) {
                     this->autoclose_enabled_at = 0;
-                    next_step.autoclose_state = AUTOCLOSE_OFF;
+                    next_step.autoclose_state = AUTOCLOSE_RESET;
                 }
             }
             else if (esp_state->button_autoclose == SENSOR_ACTIVE) {

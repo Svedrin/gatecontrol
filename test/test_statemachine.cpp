@@ -823,9 +823,13 @@ void test_autoclose_timeout_in_gate_open() {
 
     // Now we just sit idle for a while
 
+    when_time_passes(10 + AUTOCLOSE_TIMEOUT);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
     when_time_passes(50 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
-    then_autoclose_is(AUTOCLOSE_OFF);
+    then_autoclose_is(AUTOCLOSE_RESET);
 
     // The state above got reported by the code that ran
     // the state change; check that it also persisted it
