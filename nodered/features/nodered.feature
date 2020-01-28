@@ -67,7 +67,8 @@ Feature: NodeRED
 
     Enable autoclose, go to BLOCKED, and then send autoclose=pending
     without going through the OPEN state first. Then simulate the
-    close procedure as it is meant to be.
+    close procedure as it is meant to be. This test also checks what
+    happens if the gate is blocked multiple times.
 
     When the gate is open
     Then the signal light is switched to green, then off
@@ -76,6 +77,17 @@ Feature: NodeRED
     When autoclose has been enabled
     Then the signal light is switched to blue permanently
     And the node status is "blue" and says "open+autoclose"
+
+    When the gate is blocked
+    Then the signal light is switched to yellow permanently
+    And the node status is "yellow" and says "blocked"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When the gate is open
+    Then no commands are sent
 
     When the gate is blocked
     Then the signal light is switched to yellow permanently
