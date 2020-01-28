@@ -128,6 +128,44 @@ Feature: NodeRED
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
 
+  Scenario: Autoclose pending from "blocked" state, user closes gate manually
+
+    Autoclose runs normally, then triggers, but before we send a COMMIT,
+    somebody uses the gate control button to close the gate manually.
+    Make sure we cancel our commit and update the lamp correctly.
+
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
+    When autoclose has been enabled
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When the gate is blocked
+    Then the signal light is switched to yellow permanently
+    And the node status is "yellow" and says "blocked"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose has triggered
+    Then the gate receives a CLOSED command
+
+    When the gate accepts the CLOSED command
+    Then the signal light blinks red
+    And the node status is "red" and says "closing"
+
+    When the gate is moving
+    Then the signal light is switched to red permanently
+    And the node status is "yellow" and says "unknown"
+    And the gate command is reset
+
+    When the gate is closed
+    Then the signal light is switched to red, then off
+    And the node status is "green" and says "closed"
+
   Scenario: Autoclose pending from "open" state, gets reset
     When the gate is open
     Then the signal light is switched to green, then off
