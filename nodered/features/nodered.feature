@@ -328,6 +328,55 @@ Feature: NodeRED
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
 
+  Scenario: Autoclose pending from "open" state, user closes gate
+
+    See what happens when autoclose reaches the pending state,
+    but then the user manually closes the gate.
+
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
+    When autoclose has been enabled
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When the gate is moving
+    Then the signal light is switched to red permanently
+    And the node status is "yellow" and says "unknown"
+
+  Scenario: Autoclose pending from "open" state, user moves gate
+
+    See what happens when autoclose reaches the pending state,
+    but then the user manually closes the gate, then changes
+    their mind and moves it back to open. The autoclose status
+    should have been reset on our side by now, so the lamp
+    does not switch to blue, but instead to green.
+
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
+    When autoclose has been enabled
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose is pending
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When the gate is moving
+    Then the signal light is switched to red permanently
+    And the node status is "yellow" and says "unknown"
+
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
   Scenario: CLOSED command gets rejected
 
     Let's see what happens when a CLOSED command is rejected by the ESP.

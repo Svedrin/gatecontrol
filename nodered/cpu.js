@@ -103,6 +103,7 @@ switch (current_state) {
                     node_status   = status_unknown;
                     lamp_command  = cmd_light_red;
                     current_state = "UNKNOWN";
+                    context.set("autoclose_on", false);
                     break;
                 case "BLOCKED":
                     node_status   = status_blocked;
