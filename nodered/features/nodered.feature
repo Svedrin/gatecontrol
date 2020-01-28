@@ -113,6 +113,19 @@ Feature: NodeRED
     Then the signal light is switched to green, then off
     And the node status is "red" and says "open"
 
+  Scenario: Autoclose timeout from "open" state, gets reset
+    When the gate is open
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
+    When autoclose has been enabled
+    Then the signal light is switched to blue permanently
+    And the node status is "blue" and says "open+autoclose"
+
+    When autoclose gets reset
+    Then the signal light is switched to green, then off
+    And the node status is "red" and says "open"
+
   Scenario: Autoclose pending from "unknown" state
     When the gate is closed
     Then the signal light is switched to red, then off
