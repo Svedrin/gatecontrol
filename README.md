@@ -12,7 +12,17 @@ The main part of the setup is [the CPU node](nodered/cpu.js). Its state machine 
 
 ![nodered](docs/nodered.png)
 
+# Status indication
+
+The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
+
+I'm using a LIFX light bulb for the signal light:
+
+![signal](docs/photo_2020-01-28_23-49-49.jpg)
+
 # Controller State Machine
+
+The controller's state machine is focused on providing all the features in a safe way. That means, whatever weird situation we're faced with, the objective is to never make it _worse_.
 
 ![statemachine](docs/statemachine.png)
 
@@ -32,14 +42,6 @@ To command the controller to close the gate:
 * The controller triggers the gate to start moving and sends `closing` on `ctrl/<ChipID>/close_ack`.
 
 This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or the orchestrator being rebooted), the gate does not start moving unexpectedly.
-
-# Status indication
-
-The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
-
-I'm using a LIFX light bulb for the signal light:
-
-![signal](docs/photo_2020-01-28_23-49-49.jpg)
 
 # Physical setup
 
