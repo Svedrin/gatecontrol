@@ -51,7 +51,7 @@ To command the controller to close the gate:
 * If the controller is satisfied with your timing, it replies with `commit` on `ctrl/<ChipID>/close_ack`.
 * The controller triggers the gate to start moving and sends `closing` on `ctrl/<ChipID>/close_ack`.
 
-This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or the orchestrator being rebooted), the gate does not start moving unexpectedly.
+This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or NodeRED being restarted), the gate does not start moving unexpectedly.
 
 # ESP Pinout
 
