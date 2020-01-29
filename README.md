@@ -32,7 +32,7 @@ I'm using a LIFX light bulb for the signal light:
 
 # Controller State Machine
 
-The controller's state machine is focused on providing all the features in a safe way. That means, whatever weird situation we're faced with, the objective is to never make it _worse_. This is achieved by inserting yield points into the state machine, where external commands are necessary to continue. If such a command arrives, we can safely assume that warnings are taken care of. Otherwise, we cannot know what's going on, so we have to abort.
+The controller's state machine is focused on providing all the features in a safe way. That means, whatever weird situation we're faced with, the objective is to never make it _worse_. This is achieved by inserting yield points into the state machine, where external commands are necessary to continue. If such a command arrives, we can safely assume that warnings are taken care of. Otherwise, we cannot know what's going on, so we have to abort and return to a safe state.
 
 ![statemachine](docs/statemachine.png)
 
