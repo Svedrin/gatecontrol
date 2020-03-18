@@ -2,6 +2,16 @@
 
 ESP8266 firmware that implements a garage gate controller.
 
+# Physical setup
+
+You'll need:
+
+* a garage gate equipped with a motor
+* one sensor each at the top and bottom end positions to locate the gate
+* a light barrier
+* WiFi, MQTT
+* a signal light with which you warn people before automatically closing the gate.
+
 # NodeRED
 
 For GUI and for controlling the signal light, I use NodeRED. Here's the flow:
@@ -12,7 +22,17 @@ The main part of the setup is [the CPU node](nodered/cpu.js). Its state machine 
 
 ![nodered](docs/nodered.png)
 
+# Status indication
+
+The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
+
+I'm using a LIFX light bulb for the signal light:
+
+![signal](docs/photo_2020-01-28_23-49-49.jpg)
+
 # Controller State Machine
+
+The controller's state machine is focused on providing all the features in a safe way. That means, whatever weird situation we're faced with, the objective is to never make it _worse_. This is achieved by inserting yield points into the state machine, where external commands are necessary to continue. If such a command arrives, we can safely assume that warnings are taken care of. Otherwise, we cannot know what's going on, so we have to abort and return to a safe state.
 
 ![statemachine](docs/statemachine.png)
 
@@ -31,25 +51,7 @@ To command the controller to close the gate:
 * If the controller is satisfied with your timing, it replies with `commit` on `ctrl/<ChipID>/close_ack`.
 * The controller triggers the gate to start moving and sends `closing` on `ctrl/<ChipID>/close_ack`.
 
-This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or the orchestrator being rebooted), the gate does not start moving unexpectedly.
-
-# Status indication
-
-The controller regularly publishes the current state of the gate on the `ctrl/<ChipID>/current_hard_position` MQTT topic. You can (and should) use this information to drive a signal light, or monitor for the `ERROR` state.
-
-I'm using a LIFX light bulb for the signal light:
-
-![signal](docs/photo_2020-01-28_23-49-49.jpg)
-
-# Physical setup
-
-You'll need:
-
-* a garage gate equipped with a motor
-* one sensor each at the top and bottom end positions to locate the gate
-* a light barrier
-* WiFi, MQTT
-* a signal light with which you warn people before automatically closing the gate.
+This scheme basically implements [two-phase commit](https://en.wikipedia.org/wiki/Two-phase_commit_protocol). It is meant to ensure that when individual components fail (like the signal light being unavailable or NodeRED being restarted), the gate does not start moving unexpectedly.
 
 # ESP Pinout
 
