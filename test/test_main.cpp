@@ -30,6 +30,7 @@ int main( int argc, char **argv) {
     RUN_TEST(test_remote_close_early_commit);
     RUN_TEST(test_remote_close_late_commit);
     RUN_TEST(test_autoclose_from_closed);
+    RUN_TEST(test_autoclose_from_closed_with_jittery_open);
     RUN_TEST(test_autoclose_from_unknown);
     RUN_TEST(test_autoclose_from_open);
     RUN_TEST(test_autoclose_cancel);

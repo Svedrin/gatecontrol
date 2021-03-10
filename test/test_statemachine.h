@@ -14,6 +14,7 @@ void test_remote_close_blocked_before_commit();
 void test_remote_close_early_commit();
 void test_remote_close_late_commit();
 void test_autoclose_from_closed();
+void test_autoclose_from_closed_with_jittery_open();
 void test_autoclose_from_unknown();
 void test_autoclose_from_open();
 void test_autoclose_cancel();

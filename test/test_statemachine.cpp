@@ -150,19 +150,22 @@ void test_init_unknown() {
     given_gate_is_moving();
     then_current_state_is(GATE_INIT);
 
-    when_time_passes(10);
+    when_time_passes(1000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_up();
-    when_time_passes(30);
+    when_time_passes(2000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(3000);
     then_current_state_is(GATE_OPEN);
 
     given_gate_is_moving();
-    when_time_passes(40);
+    when_time_passes(4000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_down();
-    when_time_passes(50);
+    when_time_passes(5000);
     then_current_state_is(GATE_CLOSED);
 }
 
@@ -170,89 +173,101 @@ void test_init_closed() {
     given_gate_is_down();
     then_current_state_is(GATE_INIT);
 
-    when_time_passes(10);
+    when_time_passes(1000);
     then_current_state_is(GATE_CLOSED);
 
     given_gate_is_moving();
-    when_time_passes(20);
+    when_time_passes(2000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_up();
-    when_time_passes(30);
+    when_time_passes(3000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(4000);
     then_current_state_is(GATE_OPEN);
 
     given_gate_is_moving();
-    when_time_passes(40);
+    when_time_passes(5000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_down();
-    when_time_passes(50);
+    when_time_passes(6000);
     then_current_state_is(GATE_CLOSED);
 }
 
 void test_open_blocked_then_up() {
     given_gate_is_up();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
 
     given_light_barrier_is_blocked();
-    when_time_passes(20);
+    when_time_passes(2000);
     then_current_state_is(GATE_BLOCKED);
 
     given_light_barrier_is_clear();
-    when_time_passes(30);
+    when_time_passes(3000);
     then_current_state_is(GATE_OPEN);
 
     given_light_barrier_is_blocked();
-    when_time_passes(40);
+    when_time_passes(4000);
     then_current_state_is(GATE_BLOCKED);
 
     given_gate_is_moving();
-    when_time_passes(50);
+    when_time_passes(5000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_light_barrier_is_clear();
-    when_time_passes(60);
+    when_time_passes(6000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_up();
-    when_time_passes(70);
+    when_time_passes(7000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(8000);
     then_current_state_is(GATE_OPEN);
 
-    when_time_passes(80);
+    when_time_passes(9000);
     then_current_state_is(GATE_OPEN);
 }
 
 void test_open_blocked_then_down() {
     given_gate_is_up();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
 
     given_light_barrier_is_blocked();
-    when_time_passes(20);
+    when_time_passes(2000);
     then_current_state_is(GATE_BLOCKED);
 
     given_light_barrier_is_clear();
-    when_time_passes(30);
+    when_time_passes(3000);
     then_current_state_is(GATE_OPEN);
 
     given_light_barrier_is_blocked();
-    when_time_passes(40);
+    when_time_passes(4000);
     then_current_state_is(GATE_BLOCKED);
 
     given_gate_is_moving();
-    when_time_passes(50);
+    when_time_passes(5000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_light_barrier_is_clear();
-    when_time_passes(60);
+    when_time_passes(6000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_down();
-    when_time_passes(70);
+    when_time_passes(7000);
     then_current_state_is(GATE_CLOSED);
 
-    when_time_passes(80);
+    when_time_passes(8000);
     then_current_state_is(GATE_CLOSED);
 }
 
@@ -270,28 +285,31 @@ void test_remote_close_normal() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
 
-    when_mqtt_close_command_arrives_at(500);
+    when_mqtt_close_command_arrives_at(1500);
     then_the_command_is(COMMAND_ACCEPTED);
 
-    when_time_passes(800);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
-    when_mqtt_commit_command_arrives_at(10536);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
     then_the_command_is(COMMAND_ACCEPTED);
 
-    when_time_passes(1600);
+    when_time_passes(17000);
     then_current_state_is(GATE_CLOSE_TRIGGERED);
     then_we_trigger();
 
     given_gate_is_moving();
-    when_time_passes(1700);
+    when_time_passes(18000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_down();
-    when_time_passes(1800);
+    when_time_passes(19000);
     then_current_state_is(GATE_CLOSED);
 }
 
@@ -299,22 +317,25 @@ void test_remote_close_normal() {
 void test_remote_close_light_barrier_blocked_always() {
     given_gate_is_up();
     given_light_barrier_is_blocked();
-    when_time_passes(100);
+    when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
-    when_time_passes(200);
+    when_time_passes(1020);
     then_current_state_is(GATE_BLOCKED);
 
-    when_mqtt_close_command_arrives_at(500);
+    when_mqtt_close_command_arrives_at(1500);
     then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(800);
+    when_time_passes(1800);
     then_current_state_is(GATE_BLOCKED);
     then_we_do_not_trigger();
 
-    when_mqtt_commit_command_arrives_at(10536);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
     then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(1600);
+    when_time_passes(12000);
     then_current_state_is(GATE_BLOCKED);
     then_we_do_not_trigger();
 }
@@ -340,6 +361,7 @@ void test_remote_close_when_already_closed() {
     then_current_state_is(GATE_CLOSED);
     then_we_do_not_trigger();
 
+    // 10536 = 500 (close command) + 10000 (delay) + 36 (jitter)
     when_mqtt_commit_command_arrives_at(10536);
     then_the_command_is(COMMAND_IGNORED);
 
@@ -362,6 +384,7 @@ void test_remote_close_when_position_unknown() {
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
 
+    // 10536 = 500 (close command) + 10000 (delay) + 36 (jitter)
     when_mqtt_commit_command_arrives_at(10536);
     then_the_command_is(COMMAND_IGNORED);
 
@@ -374,17 +397,21 @@ void test_remote_close_broken_gate() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
-    when_mqtt_commit_command_arrives_at(10536);
-    when_time_passes(1600);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
+    when_time_passes(11600);
     then_current_state_is(GATE_CLOSE_TRIGGERED);
     then_we_trigger();
 
-    when_time_passes(1700);
+    when_time_passes(11700);
     then_current_state_is(GATE_CLOSE_TRIGGERED);
 
-    when_time_passes(1800 + GATE_ERROR_TIMEOUT);
+    when_time_passes(11800 + GATE_ERROR_TIMEOUT);
     then_current_state_is(GATE_ERROR);
 }
 
@@ -393,26 +420,30 @@ void test_remote_close_user_first() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     // User pushes da button
     given_gate_is_moving();
-    when_time_passes(900);
+    when_time_passes(1900);
     then_current_state_is(GATE_UNKNOWN);
 
     // Scotty doesn't know, so he sends his COMMIT
-    when_mqtt_commit_command_arrives_at(10536);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
     then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(1600);
+    when_time_passes(11600);
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
 
     given_gate_is_down();
-    when_time_passes(1700);
+    when_time_passes(11700);
     then_current_state_is(GATE_CLOSED);
 }
 
@@ -420,26 +451,30 @@ void test_remote_close_blocked_during_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     // User walks into the light barrier
     given_light_barrier_is_blocked();
-    when_time_passes(900);
+    when_time_passes(1900);
     then_current_state_is(GATE_BLOCKED);
 
     // Scotty doesn't know, so he sends his COMMIT
-    when_mqtt_commit_command_arrives_at(10536);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
     then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(1600);
+    when_time_passes(11600);
     then_current_state_is(GATE_BLOCKED);
     then_we_do_not_trigger();
 
     given_light_barrier_is_clear();
-    when_time_passes(1700);
+    when_time_passes(11700);
     then_current_state_is(GATE_OPEN);
 }
 
@@ -447,29 +482,33 @@ void test_remote_close_blocked_before_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     // User walks into the light barrier
     given_light_barrier_is_blocked();
-    when_time_passes(900);
+    when_time_passes(1900);
     then_current_state_is(GATE_BLOCKED);
 
     given_light_barrier_is_clear();
-    when_time_passes(1000);
+    when_time_passes(2000);
     then_current_state_is(GATE_OPEN);
 
     // Scotty doesn't know, so he sends his COMMIT
-    when_mqtt_commit_command_arrives_at(10536);
+    // 11536 = 1500 (close command) + 10000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(11536);
     then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(1600);
+    when_time_passes(11600);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
-    when_time_passes(1700);
+    when_time_passes(11700);
     then_current_state_is(GATE_OPEN);
 }
 
@@ -478,24 +517,28 @@ void test_remote_close_early_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     // Test a broken flow first: Commit arrives 5s too early
-    when_mqtt_commit_command_arrives_at(5536);
+    // 6536 = 1500 (close command) + 5000 (delay) + 36 (jitter)
+    when_mqtt_commit_command_arrives_at(6536);
     // TODO then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(5600);
+    when_time_passes(6600);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
-    when_time_passes(10536);
+    when_time_passes(11536);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
-    when_time_passes(15536);
+    when_time_passes(16536);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
@@ -505,6 +548,7 @@ void test_remote_close_early_commit() {
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
+    // 30536 = 20500 (close command) + 10000 (delay) + 36 (jitter)
     when_mqtt_commit_command_arrives_at(30536);
     then_the_command_is(COMMAND_ACCEPTED);
 
@@ -526,20 +570,23 @@ void test_remote_close_late_commit() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
-    when_mqtt_close_command_arrives_at(500);
-    when_time_passes(800);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    when_mqtt_close_command_arrives_at(1500);
+    when_time_passes(1800);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
 
     // Test a broken flow first: Commit arrives 5s too late
-    when_mqtt_commit_command_arrives_at(15536);
+    when_mqtt_commit_command_arrives_at(16536);
     // TODO then_the_command_is(COMMAND_IGNORED);
 
-    when_time_passes(15600);
+    when_time_passes(16600);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
-    when_time_passes(20536);
+    when_time_passes(19536);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
 
@@ -607,45 +654,49 @@ void test_autoclose_from_closed() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(50);
+    then_current_state_is(GATE_OWAIT);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(1050);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
     given_light_barrier_is_blocked();
-    when_time_passes(60);
+    when_time_passes(1060);
     then_current_state_is(GATE_BLOCKED);
     then_autoclose_is(AUTOCLOSE_ON);
 
     given_light_barrier_is_clear();
-    when_time_passes(70);
+    when_time_passes(1070);
     then_current_state_is(GATE_CLOSE_AUTO);
     then_autoclose_is(AUTOCLOSE_PENDING);
 
-    when_time_passes(15080);
+    when_time_passes(16080);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_TRIGGERED);
 
-    when_time_passes(15090);
+    when_time_passes(16090);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 
-    when_mqtt_close_command_arrives_at(15210);
+    when_mqtt_close_command_arrives_at(16210);
     then_the_command_is(COMMAND_ACCEPTED);
 
-    when_time_passes(15300);
+    when_time_passes(16300);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_we_do_not_trigger();
     then_autoclose_is(AUTOCLOSE_OFF);
 
-    when_mqtt_commit_command_arrives_at(25236);
+    when_mqtt_commit_command_arrives_at(26236);
     then_the_command_is(COMMAND_ACCEPTED);
 
-    when_time_passes(25300);
+    when_time_passes(26300);
     then_current_state_is(GATE_CLOSE_TRIGGERED);
     then_we_trigger();
     then_autoclose_is(AUTOCLOSE_OFF);
 
     given_gate_is_moving();
-    when_time_passes(25400);
+    when_time_passes(26400);
     then_current_state_is(GATE_UNKNOWN);
     then_autoclose_is(AUTOCLOSE_OFF);
 
@@ -656,6 +707,7 @@ void test_autoclose_from_closed() {
 }
 
 void test_autoclose_from_unknown() {
+    // Gate is closed, human opens it
     given_gate_is_down();
     when_time_passes(10);
     then_current_state_is(GATE_CLOSED);
@@ -666,6 +718,7 @@ void test_autoclose_from_unknown() {
     then_current_state_is(GATE_UNKNOWN);
     then_autoclose_is(AUTOCLOSE_OFF);
 
+    // Now they remember they wanted it to autoclose
     given_autoclose_button_is_pressed();
     when_time_passes(30);
     then_current_state_is(GATE_UNKNOWN);
@@ -686,6 +739,10 @@ void test_autoclose_from_unknown() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(50);
+    then_current_state_is(GATE_OWAIT);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(1050);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
@@ -696,27 +753,94 @@ void test_autoclose_from_open() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 
     given_autoclose_button_is_pressed();
-    when_time_passes(20);
+    when_time_passes(2010);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
     then_autoclose_is(AUTOCLOSE_ENABLED);
 
-    when_time_passes(25);
+    when_time_passes(2020);
     then_current_state_is(GATE_OPEN);
     then_we_do_not_trigger();
     then_autoclose_is(AUTOCLOSE_ON);
 
     given_autoclose_button_is_released();
-    when_time_passes(30);
+    when_time_passes(2030);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // The rest works like _from_closed, not testing again
 }
+
+void test_autoclose_from_closed_with_jittery_open() {
+    given_gate_is_down();
+    when_time_passes(10);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_OFF);
+
+    given_autoclose_button_is_pressed();
+    when_time_passes(20);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_trigger();
+    then_autoclose_is(AUTOCLOSE_ENABLED);
+
+    when_time_passes(25);
+    then_current_state_is(GATE_OPEN_TRIGGERED);
+    then_we_do_not_trigger();
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_autoclose_button_is_released();
+    when_time_passes(30);
+    then_current_state_is(GATE_CLOSED);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_moving();
+    when_time_passes(40);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_up();
+    given_light_barrier_is_clear();
+    when_time_passes(50);
+    then_current_state_is(GATE_OWAIT);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_moving();
+    when_time_passes(60);
+    then_current_state_is(GATE_UNKNOWN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_gate_is_up();
+    when_time_passes(200);
+    then_current_state_is(GATE_OWAIT);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    when_time_passes(1200);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_light_barrier_is_blocked();
+    when_time_passes(1300);
+    then_current_state_is(GATE_BLOCKED);
+    then_autoclose_is(AUTOCLOSE_ON);
+
+    given_light_barrier_is_clear();
+    when_time_passes(1400);
+    then_current_state_is(GATE_CLOSE_AUTO);
+    then_autoclose_is(AUTOCLOSE_PENDING);
+
+    when_time_passes(1410 + AUTOCLOSE_WAIT_PERIOD);
+    then_current_state_is(GATE_OPEN);
+    then_autoclose_is(AUTOCLOSE_TRIGGERED);
+
+    // The rest works like _from_closed, not testing again
+}
+
 
 
 /**
@@ -794,7 +918,7 @@ void test_autoclose_fast_gate() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(50);
-    then_current_state_is(GATE_OPEN);
+    then_current_state_is(GATE_OWAIT);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // From here on out, everything works just as in _normal,
@@ -832,28 +956,33 @@ void test_autoclose_timeout_in_gate_open() {
     // correctly when that state is never reached.
     // Enable autoclose while the gate's open (shorter)
     given_gate_is_up();
-    given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
+    given_light_barrier_is_clear();
+    when_time_passes(2000);
     given_autoclose_button_is_pressed();
-    when_time_passes(20);
+    when_time_passes(2020);
     given_autoclose_button_is_released();
-    when_time_passes(30);
+    when_time_passes(2030);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // Now we just sit idle for a while
 
-    when_time_passes(10 + AUTOCLOSE_TIMEOUT);
+    when_time_passes(2010 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
-    when_time_passes(50 + AUTOCLOSE_TIMEOUT);
+    when_time_passes(2050 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_RESET);
 
     // The state above got reported by the code that ran
     // the state change; check that it also persisted it
-    when_time_passes(60 + AUTOCLOSE_TIMEOUT);
+    when_time_passes(2060 + AUTOCLOSE_TIMEOUT);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
@@ -862,27 +991,31 @@ void test_autoclose_user_first_then_down() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
     given_autoclose_button_is_pressed();
-    when_time_passes(20);
+    when_time_passes(1020);
     given_autoclose_button_is_released();
-    when_time_passes(30);
+    when_time_passes(1030);
     then_autoclose_is(AUTOCLOSE_ON);
     given_light_barrier_is_blocked();
-    when_time_passes(40);
+    when_time_passes(1040);
     given_light_barrier_is_clear();
-    when_time_passes(50);
+    when_time_passes(1050);
     then_current_state_is(GATE_CLOSE_AUTO);
 
     // Now the user presses the gate engine remote to
     // close the gate
     given_gate_is_moving();
-    when_time_passes(60);
+    when_time_passes(1060);
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
     then_autoclose_is(AUTOCLOSE_RESET);
 
     given_gate_is_down();
-    when_time_passes(70);
+    when_time_passes(1070);
     then_current_state_is(GATE_CLOSED);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
@@ -891,32 +1024,36 @@ void test_autoclose_user_first_then_up() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
     given_autoclose_button_is_pressed();
-    when_time_passes(20);
+    when_time_passes(1020);
     given_autoclose_button_is_released();
-    when_time_passes(30);
+    when_time_passes(1030);
     then_autoclose_is(AUTOCLOSE_ON);
     given_light_barrier_is_blocked();
-    when_time_passes(40);
+    when_time_passes(1040);
     given_light_barrier_is_clear();
-    when_time_passes(50);
+    when_time_passes(1050);
     then_current_state_is(GATE_CLOSE_AUTO);
 
     // Now the user presses the gate engine remote to
     // close the gate
     given_gate_is_moving();
-    when_time_passes(60);
+    when_time_passes(1060);
     then_current_state_is(GATE_UNKNOWN);
     then_we_do_not_trigger();
     then_autoclose_is(AUTOCLOSE_RESET);
 
     // Now they change their mind and move the gate back up
     given_gate_is_up();
-    when_time_passes(70);
-    then_current_state_is(GATE_OPEN);
+    when_time_passes(1070);
+    then_current_state_is(GATE_OWAIT);
     then_autoclose_is(AUTOCLOSE_OFF);
 
-    when_time_passes(80);
+    when_time_passes(2080);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
@@ -926,31 +1063,35 @@ void test_autoclose_user_first_then_up() {
 void test_autoclose_light_barrier_timing() {
     given_gate_is_up();
     given_light_barrier_is_clear();
-    when_time_passes(100);
+    when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
     given_autoclose_button_is_pressed();
-    when_time_passes(200);
+    when_time_passes(1200);
     then_autoclose_is(AUTOCLOSE_ENABLED);
     then_current_state_is(GATE_OPEN);
     given_autoclose_button_is_released();
-    when_time_passes(300);
+    when_time_passes(1300);
 
     // block once to go to GATE_CLOSE_AUTO
     given_light_barrier_is_blocked();
-    when_time_passes(400);
+    when_time_passes(1400);
     given_light_barrier_is_clear();
-    when_time_passes(500);
+    when_time_passes(1500);
     then_current_state_is(GATE_CLOSE_AUTO);
     then_autoclose_is(AUTOCLOSE_PENDING);
 
     // The timeout shall now expire at 500+AUTOCLOSE_WAIT_PERIOD.
-    int current_trigger_time = 500 + AUTOCLOSE_WAIT_PERIOD;
+    int current_trigger_time = 1500 + AUTOCLOSE_WAIT_PERIOD;
 
     // Autoclose was initially enabled at 200, which means that if the
     // state machine erroneously uses the "enabled_at" time, it would
     // trigger autoclose at 200+AUTOCLOSE_WAIT_PERIOD instead of 500+AC_W_P.
     // Let's make sure this doesn't happen.
 
-    when_time_passes(200 + AUTOCLOSE_WAIT_PERIOD + 30);
+    when_time_passes(1200 + AUTOCLOSE_WAIT_PERIOD + 30);
     then_current_state_is(GATE_CLOSE_AUTO); // as opposed to GATE_OPEN
     then_autoclose_is(AUTOCLOSE_ON);        // as opposed to _TRIGGERED
     then_we_do_not_trigger();               // and this must never happen EVER
@@ -1047,66 +1188,70 @@ void test_autoclose_ignore_mqtt() {
     given_gate_is_up();
     given_light_barrier_is_clear();
     when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
+    then_current_state_is(GATE_OPEN);
+
     given_autoclose_button_is_pressed();
-    when_time_passes(20);
+    when_time_passes(1020);
     given_autoclose_button_is_released();
-    when_time_passes(30);
+    when_time_passes(1030);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // GATE_OPEN has to explicitly catch this situation
-    when_mqtt_close_command_arrives_at(40);
+    when_mqtt_close_command_arrives_at(1040);
     then_the_command_is(COMMAND_IGNORED);
     then_current_state_is(GATE_OPEN);
 
-    when_time_passes(50);
+    when_time_passes(1050);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // Now move on to GATE_BLOCKED
     given_light_barrier_is_blocked();
-    when_time_passes(60);
+    when_time_passes(1060);
     then_current_state_is(GATE_BLOCKED);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // GATE_BLOCKED ignores MQTT anyway
-    when_mqtt_close_command_arrives_at(70);
+    when_mqtt_close_command_arrives_at(1070);
     then_the_command_is(COMMAND_IGNORED);
     then_current_state_is(GATE_BLOCKED);
 
-    when_time_passes(80);
+    when_time_passes(1080);
     then_current_state_is(GATE_BLOCKED);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // Now move on to GATE_CLOSE_AUTO
     given_light_barrier_is_clear();
-    when_time_passes(90);
+    when_time_passes(1090);
     then_current_state_is(GATE_CLOSE_AUTO);
     then_autoclose_is(AUTOCLOSE_PENDING);
 
-    when_time_passes(100);
+    when_time_passes(1100);
     then_current_state_is(GATE_CLOSE_AUTO);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // GATE_CLOSE_AUTO ignores MQTT too
-    when_mqtt_close_command_arrives_at(110);
+    when_mqtt_close_command_arrives_at(1200);
     then_the_command_is(COMMAND_IGNORED);
     then_current_state_is(GATE_CLOSE_AUTO);
 
-    when_time_passes(120);
+    when_time_passes(1300);
     then_current_state_is(GATE_CLOSE_AUTO);
     then_autoclose_is(AUTOCLOSE_ON);
 
     // Now let's expire the timeout, move back to GATE_OPEN
     // and see that the Close command is accepted again
-    when_time_passes(90 + AUTOCLOSE_WAIT_PERIOD + 1);
+    when_time_passes(1090 + AUTOCLOSE_WAIT_PERIOD + 1);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_TRIGGERED);
 
-    when_mqtt_close_command_arrives_at(90 + AUTOCLOSE_WAIT_PERIOD + 10);
+    when_mqtt_close_command_arrives_at(1090 + AUTOCLOSE_WAIT_PERIOD + 10);
     then_the_command_is(COMMAND_ACCEPTED);
 
-    when_time_passes(90 + AUTOCLOSE_WAIT_PERIOD + 20);
+    when_time_passes(1090 + AUTOCLOSE_WAIT_PERIOD + 20);
     then_current_state_is(GATE_CLOSE_PREPARE);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
@@ -1118,23 +1263,26 @@ void test_blocked_ignore_autoclose() {
     // make sure we keep things sane.
     given_gate_is_up();
     given_light_barrier_is_blocked();
-    when_time_passes(100);
+    when_time_passes(10);
+    then_current_state_is(GATE_OWAIT);
+    when_time_passes(1010);
     then_current_state_is(GATE_OPEN);
-    when_time_passes(200);
+
+    when_time_passes(1200);
     then_current_state_is(GATE_BLOCKED);
 
     given_autoclose_button_is_pressed();
-    when_time_passes(300);
+    when_time_passes(1300);
     then_current_state_is(GATE_BLOCKED);
     then_autoclose_is(AUTOCLOSE_OFF);
 
     given_autoclose_button_is_released();
-    when_time_passes(400);
+    when_time_passes(1400);
     then_current_state_is(GATE_BLOCKED);
     then_autoclose_is(AUTOCLOSE_OFF);
 
     given_light_barrier_is_clear();
-    when_time_passes(500);
+    when_time_passes(1500);
     then_current_state_is(GATE_OPEN);
     then_autoclose_is(AUTOCLOSE_OFF);
 }
