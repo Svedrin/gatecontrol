@@ -3,7 +3,7 @@
 [*] --> GATE_INIT : boot
 
 GATE_INIT    -down-> GATE_CLOSED   : Sensor Down Active
-GATE_INIT    -down-> GATE_OPEN     : Sensor Up Active
+GATE_INIT    -down-> GATE_OWAIT    : Sensor Up Active
 GATE_INIT    -down-> GATE_UNKNOWN  : neither
 
 GATE_BLOCKED -right-> GATE_OPEN    : Light Barrier Clear\nautoclose not set
@@ -14,10 +14,14 @@ GATE_UNKNOWN -right-> GATE_CLOSED  : Sensor Down Active
 GATE_CLOSED  -left->  GATE_UNKNOWN : Sensor Down Clear
 
 GATE_OPEN    -right-> GATE_UNKNOWN : Sensor Up Clear
-GATE_UNKNOWN -left->  GATE_OPEN    : Sensor Up Active
+GATE_UNKNOWN -left->  GATE_OWAIT   : Sensor Up Active
+
+GATE_OWAIT   -left->  GATE_OPEN    : 1 second elapsed
+GATE_OWAIT   -right-> GATE_UNKNOWN : Sensor Up Clear
 
 GATE_OPEN:    hard_state = "open"
 GATE_UNKNOWN: hard_state = "unknown"
+GATE_OWAIT:   hard_state = "unknown"
 GATE_CLOSED:  hard_state = "closed"
 GATE_BLOCKED: hard_state = "blocked"
 

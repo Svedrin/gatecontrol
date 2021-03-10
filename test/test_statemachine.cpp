@@ -106,23 +106,29 @@ void test_init_open() {
     given_gate_is_up();
     then_current_state_is(GATE_INIT);
 
-    when_time_passes(10);
+    when_time_passes(1000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(2000);
     then_current_state_is(GATE_OPEN);
 
     given_gate_is_moving();
-    when_time_passes(20);
+    when_time_passes(3000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_down();
-    when_time_passes(30);
+    when_time_passes(4000);
     then_current_state_is(GATE_CLOSED);
 
     given_gate_is_moving();
-    when_time_passes(40);
+    when_time_passes(5000);
     then_current_state_is(GATE_UNKNOWN);
 
     given_gate_is_up();
-    when_time_passes(50);
+    when_time_passes(6000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(7000);
     then_current_state_is(GATE_OPEN);
 }
 

@@ -15,6 +15,7 @@ unsigned long abs(long long a) {
 
 StateMachine::StateMachine() {
     this->current_state = GATE_INIT;
+    this->entered_owait_at   = 0;
     this->received_close_at  = 0;
     this->received_commit_at = 0;
     this->autoclose_enabled_at = 0;
@@ -48,10 +49,24 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                 this->current_state = GATE_CLOSED;
             }
             else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
-                this->current_state = GATE_OPEN;
+                this->current_state = GATE_OWAIT;
+                this->entered_owait_at = esp_state->millis;
             }
             else {
                 this->current_state = GATE_UNKNOWN;
+            }
+            break;
+
+        case GATE_OWAIT:
+            if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
+                if( esp_state->millis >= this->entered_owait_at + 1000 ){
+                    this->current_state = GATE_OPEN;
+                    this->entered_owait_at = 0;
+                }
+            }
+            else if( esp_state->sensor_gate_up == SENSOR_CLEAR ){
+                this->current_state = GATE_UNKNOWN;
+                this->entered_owait_at = 0;
             }
             break;
 
@@ -81,7 +96,8 @@ step_t StateMachine::step(esp_state_t *esp_state) {
                 next_step.autoclose_state = AUTOCLOSE_OFF;
             }
             else if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
-                this->current_state = GATE_OPEN;
+                this->current_state = GATE_OWAIT;
+                this->entered_owait_at = esp_state->millis;
             }
             else if (esp_state->button_autoclose == SENSOR_ACTIVE) {
                 this->autoclose_enabled_at = esp_state->millis;

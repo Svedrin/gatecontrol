@@ -191,6 +191,7 @@ void loop() {
                 strcpy(hard_pos, "BLOCKED");
                 break;
 
+            case GATE_OWAIT:
             case GATE_UNKNOWN:
                 strcpy(hard_pos, "UNKNOWN");
                 break;

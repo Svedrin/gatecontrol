@@ -17,6 +17,7 @@
 
 typedef enum {
     GATE_INIT,            // State used for the first reading after boot
+    GATE_OWAIT,           // Gate is full open (top sensor is low), but we don't trust the reading just yet
     GATE_OPEN,            // Gate is full open (top sensor is low)
     GATE_UNKNOWN,         // Gate is somewhere between full open and full closed
     GATE_CLOSED,          // Gate is full closed (bottom sensor is low)
@@ -60,6 +61,7 @@ typedef struct {
 class StateMachine {
     protected:
         state_t current_state;
+        unsigned long entered_owait_at;
         unsigned long received_close_at;
         unsigned long received_commit_at;
         unsigned long autoclose_timer_started_at;
