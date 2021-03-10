@@ -128,7 +128,21 @@ void test_init_open() {
     when_time_passes(6000);
     then_current_state_is(GATE_OWAIT);
 
+    given_gate_is_moving();
+    when_time_passes(6050);
+    then_current_state_is(GATE_UNKNOWN);
+
+    given_gate_is_up();
     when_time_passes(7000);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(7500);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(7800);
+    then_current_state_is(GATE_OWAIT);
+
+    when_time_passes(8000);
     then_current_state_is(GATE_OPEN);
 }
 
