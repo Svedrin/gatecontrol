@@ -59,7 +59,7 @@ step_t StateMachine::step(esp_state_t *esp_state) {
 
         case GATE_OWAIT:
             if( esp_state->sensor_gate_up == SENSOR_ACTIVE ){
-                if( esp_state->millis >= this->entered_owait_at + 1000 ){
+                if( esp_state->millis >= this->entered_owait_at + OWAIT_TIMEOUT ){
                     this->current_state = GATE_OPEN;
                     this->entered_owait_at = 0;
                 }

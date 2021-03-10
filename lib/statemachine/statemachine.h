@@ -1,5 +1,9 @@
 #include <sensorstate.h>
 
+// When the gate arrives at the "up" position, how long do we expect
+// it to stay there before we believe that it is really up?
+#define OWAIT_TIMEOUT 1000
+
 // After autoclose is triggered, users need to block the light barrier once
 // for the whole process to start. How long do we wait for that to happen
 // before we cancel the whole process?
